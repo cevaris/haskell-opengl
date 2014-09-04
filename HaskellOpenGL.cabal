@@ -24,7 +24,12 @@ executable DrawingPoints
     main-is:         DrawingPoints.hs
     build-depends:   base,
                      GLUT
---executable rpar
+executable BasicTriangle
+    hs-source-dirs:  src/examples
+    main-is:         BasicTriangle.hs
+    build-depends:   base,
+                     GLUT
+                     --executable rpar
 --    hs-source-dirs:  src
 --    other-modules:   Haskell.Ch2.Example
 --    main-is:         rpar.hs
