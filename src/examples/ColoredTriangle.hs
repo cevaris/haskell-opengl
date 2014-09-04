@@ -19,7 +19,7 @@ blue  = CustomColor 0 0 1
 --blue  = 0 0 1 :: CustomColor
 
 trianglePoints :: [(GLfloat,GLfloat,GLfloat,CustomColor)]
-trianglePoints = [(0, 0.5, 0, blue), (0.5, (-0.5), 0, red), ((-0.5), (-0.5), 0, red)]
+trianglePoints = [(0, 0.5, 0, blue), (0.5, (-0.5), 0, green), ((-0.5), (-0.5), 0, red)]
  
 main :: IO ()
 main = do
@@ -32,17 +32,8 @@ main = do
 color3f :: CustomColor -> IO ()
 color3f c = color $ Color3 (r c) (g c) (b c)
 
-color3f :: CustomColor -> IO ()
-color3f c = color $ Color3 (r c) (g c) (b c)
-
---vertex3f x y z = vertex $ Vertex3 x y (z :: GLfloat)
-
---colorVertex :: GLfloat -> GLfloat -> GLfloat -> CustomColor -> Vertex3
---colorVertex x y z c = vertex $ Vertex3 1 2 3
---colorVertex :: x y z c = do 
---    Color3f (r c) (b c) (g c)
---    Vertex3 x y z
-
+vertex3f :: GLfloat -> GLfloat -> GLfloat -> IO ()
+vertex3f x y z = vertex $ Vertex3 x y z
 
 display :: DisplayCallback
 display = do 
@@ -50,7 +41,10 @@ display = do
 
   -- http://stackoverflow.com/questions/9300773/drawing-lines-with-opengl-in-haskell#
   renderPrimitive Polygon $ do
-    mapM_ (\(x, y, z, c) -> vertex $ Vertex3 x y z ) trianglePoints
+    mapM_ (\(x, y, z, c) ->  do 
+        color3f  c
+        vertex3f x y z
+      ) trianglePoints
   flush
 
 
