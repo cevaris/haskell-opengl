@@ -14,6 +14,22 @@ extra-source-files:  readme.md
 --            sudoku17.49151.txt
 
 
+--library
+--  build-depends:   base
+--  hs-source-dirs:  src/objects
+--  exposed-modules: Cube
+
+--library
+--  build-depends:   base
+--  hs-source-dirs:  src/inputs
+--  exposed-modules: Bindings
+
+--library
+--  build-depends:   base
+--  hs-source-dirs:  src/render
+--  exposed-modules: Display
+
+
 executable HelloWorld
     hs-source-dirs:  src/examples
     main-is:         HelloWorld.hs
@@ -34,7 +50,21 @@ executable ColoredTriangle
     main-is:         ColoredTriangle.hs
     build-depends:   base,
                      GLUT
-                     --executable rpar
+
+executable ModuleCube
+    hs-source-dirs:  src/examples
+                     src/inputs
+                     src/render
+                     src/objects
+    main-is:         ModuleCube.hs
+    other-modules:   Bindings
+                     Cube
+                     Display
+    build-depends:   base,
+                     GLUT
+
+
+--executable rpar
 --    hs-source-dirs:  src
 --    other-modules:   Haskell.Ch2.Example
 --    main-is:         rpar.hs
