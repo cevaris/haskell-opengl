@@ -1,0 +1,101 @@
+name:              HaskellOpenGL
+Build-Type:        Simple
+cabal-version:     >= 1.2
+version:           0.1
+author:            Adam Cardenas
+maintainer:        cevaris@gmail.com
+category:          Graphics
+cabal-version:     >=1.10
+
+extra-source-files:  readme.md
+
+--data-dir:   src/resources/
+--data-files: sudoku17.1000.txt
+--            sudoku17.16000.txt
+--            sudoku17.49151.txt
+
+
+executable HelloWorld
+    hs-source-dirs:  src/examples
+    main-is:         HelloWorld.hs
+    build-depends:   base,
+                     GLUT
+
+--executable rpar
+--    hs-source-dirs:  src
+--    other-modules:   Haskell.Ch2.Example
+--    main-is:         rpar.hs
+--    build-depends:   base, 
+--                     parallel, 
+--                     time
+
+
+--executable sudoku1
+--    hs-source-dirs: src/sudoku/
+--    main-is:        sudoku1.hs
+--    other-modules:  Sudoku
+--    build-depends:  base,
+--                    parallel,
+--                    array,
+--                    time
+
+--executable sudoku2
+--    hs-source-dirs: src/sudoku/
+--    main-is:        sudoku2.hs
+--    other-modules:  Sudoku
+--    build-depends:  base,
+--                    deepseq,
+--                    parallel,
+--                    array,
+--                    time     
+--    ghc-options:    -O2
+--                    -threaded
+--                    -rtsopts
+--                    -eventlog
+
+--executable sudoku3
+--    hs-source-dirs: src/sudoku/
+--    main-is:        sudoku3.hs
+--    other-modules:  Sudoku
+--    build-depends:  base,
+--                    deepseq,
+--                    parallel,
+--                    array,
+--                    time     
+--    ghc-options:    -O2
+--                    -threaded
+--                    -rtsopts
+--                    -eventlog
+
+--executable sudoku5
+--    hs-source-dirs: src/sudoku/
+--    main-is:        sudoku5.hs
+--    other-modules:  Sudoku
+--    build-depends:  base,
+--                    deepseq,
+--                    parallel,
+--                    array,
+--                    time     
+--    ghc-options:    -O2
+--                    -threaded
+--                    -rtsopts
+--                    -eventlog
+
+--executable strategy
+--    hs-source-dirs: src/
+--    main-is:        strategy.hs
+--    build-depends:  base,
+--                    parallel,
+--                    array,
+--                    time     
+--    ghc-options:    -O2
+--                    -threaded
+--                    -rtsopts
+--                    -eventlog
+--                    -XDataKinds
+           
+--executable ex2-1
+--    hs-source-dirs: src/haskell/ch2
+--    main-is:        ex2-1.hs
+--    build-depends:  base
+
