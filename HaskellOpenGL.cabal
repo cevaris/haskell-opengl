@@ -5,7 +5,6 @@ version:           0.1
 author:            Adam Cardenas
 maintainer:        cevaris@gmail.com
 category:          Graphics
-cabal-version:     >=1.10
 
 extra-source-files:  readme.md
 
@@ -20,7 +19,11 @@ executable HelloWorld
     main-is:         HelloWorld.hs
     build-depends:   base,
                      GLUT
-
+executable Drawing
+    hs-source-dirs:  src/examples
+    main-is:         Drawing.hs
+    build-depends:   base,
+                     GLUT
 --executable rpar
 --    hs-source-dirs:  src
 --    other-modules:   Haskell.Ch2.Example
