@@ -19,9 +19,9 @@ executable HelloWorld
     main-is:         HelloWorld.hs
     build-depends:   base,
                      GLUT
-executable Drawing
+executable DrawingPoints
     hs-source-dirs:  src/examples
-    main-is:         Drawing.hs
+    main-is:         DrawingPoints.hs
     build-depends:   base,
                      GLUT
 --executable rpar
