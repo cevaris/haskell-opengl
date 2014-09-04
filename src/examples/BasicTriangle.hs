@@ -13,7 +13,9 @@ main = do
 display :: DisplayCallback
 display = do 
   clear [ColorBuffer]
-  renderPrimitive Triangles $
+
+  -- http://stackoverflow.com/questions/9300773/drawing-lines-with-opengl-in-haskell#
+  renderPrimitive Polygon $ do
     mapM_ (\(x, y, z) -> vertex $ Vertex3 x y z) myPoints
   flush
 

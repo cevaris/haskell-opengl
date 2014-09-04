@@ -29,6 +29,11 @@ executable BasicTriangle
     main-is:         BasicTriangle.hs
     build-depends:   base,
                      GLUT
+executable ColoredTriangle
+    hs-source-dirs:  src/examples
+    main-is:         ColoredTriangle.hs
+    build-depends:   base,
+                     GLUT
                      --executable rpar
 --    hs-source-dirs:  src
 --    other-modules:   Haskell.Ch2.Example

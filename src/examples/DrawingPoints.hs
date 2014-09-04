@@ -13,6 +13,6 @@ main = do
 display :: DisplayCallback
 display = do 
   clear [ColorBuffer]
-  renderPrimitive Points $
+  renderPrimitive Points $ do
      mapM_ (\(x, y, z) -> vertex $ Vertex3 x y z) myPoints
   flush   
