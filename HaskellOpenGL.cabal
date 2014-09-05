@@ -50,13 +50,17 @@ executable ColoredTriangle
     main-is:         ColoredTriangle.hs
     build-depends:   base,
                      GLUT
-
-executable ModuleCube
+executable Gears
+    hs-source-dirs:  src/objects
+    main-is:         Gears.hs
+    build-depends:   base,
+                     GLUT
+executable BasicCube
     hs-source-dirs:  src/examples
                      src/inputs
                      src/render
                      src/objects
-    main-is:         ModuleCube.hs
+    main-is:         BasicCube.hs
     other-modules:   Bindings
                      Cube
                      Display
