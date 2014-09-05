@@ -50,11 +50,12 @@ executable ColoredTriangle
     main-is:         ColoredTriangle.hs
     build-depends:   base,
                      GLUT
-executable Gears
-    hs-source-dirs:  src/objects
-    main-is:         Gears.hs
+executable GearsAsgn1
+    hs-source-dirs:  src/assignments
+    main-is:         GearsAsgn1.hs
     build-depends:   base,
                      GLUT
+                     
 executable BasicCube
     hs-source-dirs:  src/examples
                      src/inputs

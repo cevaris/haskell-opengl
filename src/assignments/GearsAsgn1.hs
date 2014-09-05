@@ -177,7 +177,7 @@ draw (gear1, gear2, gear3, autoexit) state = do
    frames state $~! (+1)
    t0' <- get (t0 state)
    t <- get elapsedTime
-   when (t - t0' >= 5000) $ do
+   when (t - t0' >= 1000) $ do
       f <- get (frames state)
       let seconds = fromIntegral (t - t0') / 1000 :: GLfloat
           fps = fromIntegral f / seconds
@@ -268,7 +268,7 @@ myInit args = do
       materialAmbientAndDiffuse Front $= Color4 0.2 0.2 1.0 1.0
       gear 1.3 2 0.5 10 0.7
 
-   normalize $= Enabled
+   --normalize $= Enabled
 
    flags <- opts args
    when (GLInfo `elem` flags) info
