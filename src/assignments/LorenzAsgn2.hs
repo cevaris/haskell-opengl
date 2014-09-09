@@ -43,17 +43,26 @@
 
 --data Lorenz = Lorenz {step::Integer, x::GLfloat, y::GLfloat, z::GLfloat} deriving (Read, Show, Eq)
 
-lorenz  :: Float -> [Float]
-lorenz  dt = go 1 1 1 5 []
+lorenz  :: Float -> [(Integer, Float, Float, Float)]
+lorenz  dt = go 1 1 1 10 []
         where 
           go :: Float -> Float -> Float -> Integer -> [(Integer, Float, Float, Float)] -> [(Integer, Float, Float, Float)]
-          go _ _ _ 0    xs = xs
-          go x y z step xs = do 
-            let s  = 10
-                b  = 2.6666
-                r  = 28
-                x' = (x+(dt*(s*(y-x))))
-                y' = (y+(dt*(x*(r-z))-y))
-                z' = (z+(dt*(x*y-b*z)))
-            go x' y' z' step-1 (step, x', y', z'):xs
+          go _ _ _ 0    xs = (0, 1, 1, 1):xs
+          go x y z step xs = let s  = 10
+                                 b  = 2.6666
+                                 r  = 28
+                                 x' = (x+(dt*(s*(y-x))))
+                                 y' = (y+(dt*(x*(r-z))-y))
+                                 z' = (z+(dt*(x*y-b*z)))
+                             in go x' y' z' (step-1) ((step, x', y', z'):xs)
+
+
+          --go x y z step xs = do 
+          --  let s  = 10
+          --      b  = 2.6666
+          --      r  = 28
+          --      x' = (x+(dt*(s*(y-x))))
+          --      y' = (y+(dt*(x*(r-z))-y))
+          --      z' = (z+(dt*(x*y-b*z)))
+          --  go x' y' z' (step-1) (step, x', y', z'):xs
           --go (y:ys) = y `k` go ys
