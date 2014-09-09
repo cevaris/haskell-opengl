@@ -55,7 +55,12 @@ executable GearsAsgn1
     main-is:         GearsAsgn1.hs
     build-depends:   base,
                      GLUT
-                     
+executable LorenzAsgn2
+    hs-source-dirs:  src/assignments
+    main-is:         LorenzAsgn2.hs
+    build-depends:   base,
+                     GLUT
+
 executable BasicCube
     hs-source-dirs:  src/examples
                      src/inputs
