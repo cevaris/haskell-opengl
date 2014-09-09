@@ -6,7 +6,6 @@ b  = 2.6666
 r  = 28
 dt = 0.001
 
-
 data Lorenz = Lorenz {step::Integer, x::Float, y::Float, z::Float} deriving (Read, Show, Eq)
 --data LorenzParams = LorenzParams {s:: Integer, b:: Float, r:: Integer, dt:: Float, limit:: Integer} deriving (Read, Show, Eq)
 
