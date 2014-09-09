@@ -179,9 +179,12 @@ draw (gear1, gear2, gear3, autoexit) state = do
    t <- get elapsedTime
    when (t - t0' >= 1000) $ do
       f <- get (frames state)
+      angle <- get (angle' state)
+      view <- get (viewRot state)
       let seconds = fromIntegral (t - t0') / 1000 :: GLfloat
           fps = fromIntegral f / seconds
-      putStrLn (show f ++ " frames in " ++ show seconds ++ " seconds = "++ show fps ++ " FPS")
+      putStrLn (show f ++ " frames in " ++ show seconds ++ " seconds = "++ show fps ++ " FPS" ++ " angle " ++ show angle ++ " view " ++ show view)
+      --putStrLn (show f ++ " frames in " ++ show seconds ++ " seconds = "++ show fps ++ " FPS")
       t0 state $= t
       frames state $= 0
       when ((t >= 999 * autoexit) && (autoexit /= 0)) $

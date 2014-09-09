@@ -12,8 +12,7 @@ data State = State {
    t0      :: IORef Int,
    viewRot :: IORef View,
    angle'  :: IORef GLfloat,
-   size    :: Float 
-} deriving (Read, Show)
+   size    :: Float }
 
 makeState :: IO State
 makeState = do
@@ -132,9 +131,11 @@ draw obj1 state = do
   t <- get elapsedTime
   when (t - t0' >= 1000) $ do
     f <- get (frames state)
+    angle <- get (angle' state)
+    view <- get (viewRot state)
     let seconds = fromIntegral (t - t0') / 1000 :: GLfloat
         fps = fromIntegral f / seconds
-    putStrLn (show f ++ " frames in " ++ show seconds ++ " seconds = "++ show fps ++ " FPS " ++ " state = " show state)
+    putStrLn (show f ++ " frames in " ++ show seconds ++ " seconds = "++ show fps ++ " FPS" ++ " angle " ++ show angle ++ " view " ++ show view)
     t0 state $= t
     frames state $= 0
 
