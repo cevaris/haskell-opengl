@@ -97,7 +97,7 @@ reshape s@(Size width height) = do
    frustum (-1) 1 (-h) h 5 60
    matrixMode $= Modelview 0
    loadIdentity
-   translate (Vector3 0 0 (-40 :: GLfloat))
+   translate (Vector3 3 2 (-40 :: GLfloat))
   
 ---- Set color
 --color3f :: CustomColor -> IO ()
@@ -210,12 +210,13 @@ myInit args state = do
 
 main :: IO ()
 main = do
+    initialWindowSize $= Size 500 500
     (_progName, args) <- getArgsAndInitialize
-    _window <- createWindow "Hello World"
     initialDisplayMode $= [ RGBMode, WithDepthBuffer, DoubleBuffered ]
-
+    
     initialWindowPosition $= Position 0 0
-    initialWindowSize $= Size 300 300
+    _window <- createWindow "Lorenz Attractor - Adam Cardenas"
+
     state <- makeState
     lorenzObject <- myInit args state
 
