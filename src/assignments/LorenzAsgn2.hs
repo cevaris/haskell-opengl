@@ -11,7 +11,6 @@ data State = State {
    frames  :: IORef Int,
    t0      :: IORef Int,
    viewRot :: IORef View,
-   angle'  :: IORef GLfloat,
    size    :: Float }
 
 makeState :: IO State
@@ -19,8 +18,7 @@ makeState = do
    f <- newIORef 0
    t <- newIORef 0
    v <- newIORef (20, 30, 0)
-   a <- newIORef 0
-   return $ State { frames = f, t0 = t, viewRot = v, angle' = a , size = 5 }
+   return $ State { frames = f, t0 = t, viewRot = v, size = 5 }
 
 ----------------------------------------------------------------------------------------------------------------
 
@@ -75,7 +73,6 @@ modRot state (dx,dy,dz) = do
 
 idle :: State -> IdleCallback
 idle state = do
-   --angle' state $~! (+2)
    postRedisplay Nothing
 
 visible :: State -> Visibility -> IO ()
@@ -112,7 +109,6 @@ draw :: DisplayList -> State -> IO ()
 draw obj1 state = do
   clear [ ColorBuffer, DepthBuffer ]
   (x, y, z) <- get (viewRot state)
-  a <- get (angle' state)
 
   let translatef = translate :: Vector3 GLfloat -> IO ()
   preservingMatrix $ do
@@ -122,7 +118,7 @@ draw obj1 state = do
 
   preservingMatrix $ do
     translatef (Vector3 (-3) (-2) 0)
-    rotate a (Vector3 0 0 1)
+    rotate (0.0 :: GLfloat) (Vector3 0 0 1)
     callList obj1
 
   swapBuffers
@@ -131,11 +127,10 @@ draw obj1 state = do
   t <- get elapsedTime
   when (t - t0' >= 1000) $ do
     f <- get (frames state)
-    angle <- get (angle' state)
     view <- get (viewRot state)
     let seconds = fromIntegral (t - t0') / 1000 :: GLfloat
         fps = fromIntegral f / seconds
-    putStrLn (show f ++ " frames in " ++ show seconds ++ " seconds = "++ show fps ++ " FPS" ++ " angle " ++ show angle ++ " view " ++ show view)
+    putStrLn (show f ++ " frames in " ++ show seconds ++ " seconds = "++ show fps ++ " FPS" ++ " view " ++ show view)
     t0 state $= t
     frames state $= 0
 
