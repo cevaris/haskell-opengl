@@ -12,7 +12,8 @@ data State = State {
    t0      :: IORef Int,
    viewRot :: IORef View,
    angle'  :: IORef GLfloat,
-   size    :: Float }
+   size    :: Float 
+} deriving (Read, Show)
 
 makeState :: IO State
 makeState = do
@@ -75,7 +76,7 @@ modRot state (dx,dy,dz) = do
 
 idle :: State -> IdleCallback
 idle state = do
-   angle' state $~! (+2)
+   --angle' state $~! (+2)
    postRedisplay Nothing
 
 visible :: State -> Visibility -> IO ()
@@ -133,7 +134,7 @@ draw obj1 state = do
     f <- get (frames state)
     let seconds = fromIntegral (t - t0') / 1000 :: GLfloat
         fps = fromIntegral f / seconds
-    putStrLn (show f ++ " frames in " ++ show seconds ++ " seconds = "++ show fps ++ " FPS")
+    putStrLn (show f ++ " frames in " ++ show seconds ++ " seconds = "++ show fps ++ " FPS " ++ " state = " show state)
     t0 state $= t
     frames state $= 0
 
