@@ -11,7 +11,8 @@ data State = State {
    frames  :: IORef Int,
    t0      :: IORef Int,
    viewRot :: IORef View,
-   angle'  :: IORef GLfloat }
+   angle'  :: IORef GLfloat,
+   size    :: Float }
 
 makeState :: IO State
 makeState = do
@@ -19,7 +20,7 @@ makeState = do
    t <- newIORef 0
    v <- newIORef (20, 30, 0)
    a <- newIORef 0
-   return $ State { frames = f, t0 = t, viewRot = v, angle' = a }
+   return $ State { frames = f, t0 = t, viewRot = v, angle' = a , size = 5 }
 
 ----------------------------------------------------------------------------------------------------------------
 
@@ -44,8 +45,8 @@ lorenz  dt = go lzBase [lzBase]
           go (Lorenz i x y z)  xs = let l = Lorenz (i+1) (x+dt*(s*(y-x))) (y+dt*(x*(r-z)-y)) (z+dt*(x*y-b*z))
                                     in go l (l:xs)
 
-lorenzPoints :: [(GLfloat,GLfloat,GLfloat)]
-lorenzPoints = map (\(Lorenz i x y z) -> ((realToFrac (x/10) :: GLfloat), (realToFrac (y/10) :: GLfloat), (realToFrac (z/10) :: GLfloat))) (lorenz 0.001)
+lorenzPoints :: State -> [(GLfloat,GLfloat,GLfloat)] 
+lorenzPoints state = map (\(Lorenz i x y z) -> ((realToFrac (x/(size state)) :: GLfloat), (realToFrac (y/(size state)) :: GLfloat), (realToFrac (z/(size state)) :: GLfloat))) (lorenz 0.001)
 
 ----------------------------------------------------------------------------------------------------------------
 
@@ -137,11 +138,11 @@ draw obj1 state = do
     frames state $= 0
 
 
-myInit :: [String] -> IO DisplayList
-myInit args = do
+myInit :: [String] -> State -> IO DisplayList
+myInit args state = do
   l <- defineNewList Compile $ do
     renderPrimitive LineStrip $ do
-      mapM_ (\(x, y, z) -> vertex3f x y z ) lorenzPoints
+      mapM_ (\(x, y, z) -> vertex3f x y z ) (lorenzPoints state)
   return l
    --position (Light 0) $= Vertex4 5 5 10 0
    --cullFace $= Just Back
@@ -216,7 +217,7 @@ main = do
     initialWindowPosition $= Position 0 0
     initialWindowSize $= Size 300 300
     state <- makeState
-    lorenzObject <- myInit args
+    lorenzObject <- myInit args state
 
     displayCallback $= draw lorenzObject state
     reshapeCallback $= Just reshape
