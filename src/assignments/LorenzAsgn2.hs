@@ -8,14 +8,14 @@ r  = 28
 dt = 0.001
 
 lorenz  :: Float -> [Lorenz]
-lorenz  dt = go 1 1 1 0 [Lorenz 0 1 1 1]
+lorenz  dt = go 0 1 1 1 [Lorenz 0 1 1 1]
         where 
-          go :: Float -> Float -> Float -> Integer -> [Lorenz] -> [Lorenz]
-          go _ _ _ 10    xs = reverse xs
-          go x y z step xs = let dx = s*(y-x)
+          go :: Integer -> Float -> Float -> Float -> [Lorenz] -> [Lorenz]
+          go 10   _ _ _ xs = reverse xs
+          go step x y z xs = let dx = s*(y-x)
                                  dy = x*(r-z)-y
                                  dz = x*y-b*z
                                  x' = x+dt*dx
                                  y' = y+dt*dy
                                  z' = z+dt*dz
-                             in go x' y' z' (step+1) (Lorenz (step+1) x' y' z':xs)
+                             in go (step+1) x' y' z' (Lorenz (step+1) x' y' z':xs)
