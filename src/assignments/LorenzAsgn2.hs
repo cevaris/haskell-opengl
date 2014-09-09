@@ -12,11 +12,5 @@ lorenz  dt = go (Lorenz 0 1 1 1) [(Lorenz 0 1 1 1)]
         where 
           go :: Lorenz -> [Lorenz] -> [Lorenz]
           go (Lorenz 10 _ _ _) xs = reverse xs
-          go (Lorenz i x y z)  xs = let dx = s*(y-x)
-                                        dy = x*(r-z)-y
-                                        dz = x*y-b*z
-                                        x' = x+dt*dx
-                                        y' = y+dt*dy
-                                        z' = z+dt*dz
-                                        l  = (Lorenz (i+1) x' y' z')
+          go (Lorenz i x y z)  xs = let l = (Lorenz (i+1) (x+dt*(s*(y-x))) (y+dt*(x*(r-z)-y)) (z+dt*(x*y-b*z)))
                                     in go l (l:xs)
