@@ -140,7 +140,8 @@ draw obj1 state = do
 myInit :: [String] -> IO DisplayList
 myInit args = do
   l <- defineNewList Compile $ do
-    mapM_ (\(x, y, z) -> vertex3f x y z ) lorenzPoints
+    renderPrimitive LineStrip $ do
+      mapM_ (\(x, y, z) -> vertex3f x y z ) lorenzPoints
   return l
    --position (Light 0) $= Vertex4 5 5 10 0
    --cullFace $= Just Back
