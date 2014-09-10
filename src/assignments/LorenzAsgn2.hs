@@ -18,8 +18,8 @@ makeState :: IO State
 makeState = do
    f <- newIORef 0
    t <- newIORef 0
-   v <- newIORef (20, 30, 0)
-   a <- newIORef 0.1
+   v <- newIORef (0, 0, 0)
+   a <- newIORef 0
    return $ State { frames = f, t0 = t, viewRot = v, angle' = a , size = 5 }
 
 ----------------------------------------------------------------------------------------------------------------
@@ -82,11 +82,6 @@ visible :: State -> Visibility -> IO ()
 visible state Visible    = idleCallback $= Just (idle state)
 visible _     NotVisible = idleCallback $= Nothing
 
---reshape :: ReshapeCallback
---reshape size = do
---  viewport $= (Position 0 0, size)
---  postRedisplay Nothing
--- new window size or exposure
 reshape :: ReshapeCallback
 reshape s@(Size width height) = do
    let h = fromIntegral height / fromIntegral width
@@ -99,9 +94,6 @@ reshape s@(Size width height) = do
    loadIdentity
    translate (Vector3 0 0 (-40 :: GLfloat))
   
----- Set color
---color3f :: CustomColor -> IO ()
---color3f c = color $ Color3 (r c) (g c) (b c)
 
 -- Set Vertex
 vertex3f :: GLfloat -> GLfloat -> GLfloat -> IO ()
@@ -117,7 +109,6 @@ draw obj1 state = do
 
   let translatef = translate :: Vector3 GLfloat -> IO ()
 
-
   preservingMatrix $ do
     rotate x (Vector3 1 0 0)
     rotate y (Vector3 0 1 0)
@@ -125,7 +116,7 @@ draw obj1 state = do
 
     preservingMatrix $ do
       --translatef (Vector3 x y z)
-      rotate (0.0 :: GLfloat) (Vector3 0 0 0)
+      --rotate (0.0 :: GLfloat) (Vector3 0 0 0)
       callList obj1
 
   swapBuffers
@@ -145,70 +136,16 @@ draw obj1 state = do
 
 myInit :: [String] -> State -> IO DisplayList
 myInit args state = do
+  position (Light 0) $= Vertex4 5 5 10 0
+  cullFace $= Just Back
+  lighting $= Enabled
+  light (Light 0) $= Enabled
+  depthFunc $= Just Less
+
   l <- defineNewList Compile $ do
     renderPrimitive LineStrip $ do
       mapM_ (\(x, y, z) -> vertex3f x y z ) (lorenzPoints state)
   return l
-   --position (Light 0) $= Vertex4 5 5 10 0
-   --cullFace $= Just Back
-   --lighting $= Enabled
-   --light (Light 0) $= Enabled
-   --depthFunc $= Just Less
-
-   -- make the gears
-   --g1 <- defineNewList Compile $ do
-   --   --materialAmbientAndDiffuse Front $= Color4 0.8 0.1 0.0 1.0
-   --   --gear 1 4 1 20 0.7
-
-   --g2 <- defineNewList Compile $ do
-   --   materialAmbientAndDiffuse Front $= Color4 0.0 0.8 0.2 1.0
-   --   gear 0.5 2 2 10 0.7
-
-   --g3 <- defineNewList Compile $ do
-   --   materialAmbientAndDiffuse Front $= Color4 0.2 0.2 1.0 1.0
-   --   gear 1.3 2 0.5 10 0.7
-
-   --normalize $= Enabled
-
-   --return g1
-
---display :: DisplayCallback
---display = do 
---  clear [ColorBuffer]
---  state <- makeState
-
---  -- http://stackoverflow.com/questions/9300773/drawing-lines-with-opengl-in-haskell#
---  renderPrimitive LineStrip $ do
---    mapM_ (\(x, y, z) -> vertex3f x y z ) lorenzPoints
---  flush
-
-
---draw :: (DisplayList,DisplayList,DisplayList,Int) -> State -> IO ()
---draw (gear1, gear2, gear3, autoexit) state = do
---   clear [ ColorBuffer, DepthBuffer ]
---   (x, y, z) <- get (viewRot state)
---   a <- get (angle' state)
-
---   let translatef = translate :: Vector3 GLfloat -> IO ()
---   preservingMatrix $ do
---      rotate x (Vector3 1 0 0)
---      rotate y (Vector3 0 1 0)
---      rotate z (Vector3 0 0 1)
-
---      preservingMatrix $ do
---         translatef (Vector3 (-3) (-2) 0)
---         rotate a (Vector3 0 0 1)
---         callList gear1
-
---      preservingMatrix $ do
---         translatef (Vector3 3.1 (-2) 0)
---         rotate (-2 * a - 9) (Vector3 0 0 1)
---         callList gear2
-
---      preservingMatrix $ do
---         translatef (Vector3 (-3.1) 4.2 0)
---         rotate (-2 * a - 25) (Vector3 0 0 1)
---         callList gear3
 
 ----------------------------------------------------------------------------------------------------------------
 -- Key Binding
