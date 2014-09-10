@@ -48,6 +48,16 @@ lorenz  dt = go lzBase [lzBase]
 lorenzPoints :: State -> [(GLfloat,GLfloat,GLfloat)] 
 lorenzPoints state = map (\(Lorenz i x y z) -> ((realToFrac (x/(size state)) :: GLfloat), (realToFrac (y/(size state)) :: GLfloat), (realToFrac (z/(size state)) :: GLfloat))) (lorenz 0.001)
 
+--rainbowColors = [(x,y,z) | x <- [1..5], y <- [1..5], z <- [1..5]]
+----------------------------------------------------------------------------------------------------------------
+
+
+----------------------------------------------------------------------------------------------------------------
+-- Grid
+
+-- (X, Y, Z ) Grid Points
+gridPoints = [(x, 0, 0) | x <- [-10..10]] ++ [(0, x, 0) | x <- [-10..10]] ++ [(0, 0, x) | x <- [-10..10]]
+
 ----------------------------------------------------------------------------------------------------------------
 
 
@@ -102,12 +112,11 @@ vertex3f x y z = vertex $ Vertex3 x y z
 
 draw :: DisplayList -> State -> IO ()
 draw obj1 state = do
-  clear [ ColorBuffer, DepthBuffer ]
+  let translatef = translate :: Vector3 GLfloat -> IO ()
 
+  clear [ ColorBuffer, DepthBuffer ]
   (x, y, z) <- get (viewRot state)
   a <- get (angle' state)
-
-  let translatef = translate :: Vector3 GLfloat -> IO ()
 
   preservingMatrix $ do
     rotate x (Vector3 1 0 0)
