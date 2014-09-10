@@ -56,6 +56,7 @@ lorenzPoints state = map (\(Lorenz i x y z) -> ((realToFrac (x/(size state)) :: 
 -- Grid
 
 -- (X, Y, Z ) Grid Points
+gridPoints :: [(GLfloat, GLfloat, GLfloat)]
 gridPoints = [(x, 0, 0) | x <- [-10..10]] ++ [(0, x, 0) | x <- [-10..10]] ++ [(0, 0, x) | x <- [-10..10]]
 
 ----------------------------------------------------------------------------------------------------------------
