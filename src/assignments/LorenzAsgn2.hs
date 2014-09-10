@@ -94,7 +94,7 @@ reshape s@(Size width height) = do
    frustum (-1) 1 (-h) h 5 60
    matrixMode $= Modelview 0
    loadIdentity
-   translate (Vector3 3 2 (-40 :: GLfloat))
+   translate (Vector3 0 0 (-40 :: GLfloat))
   
 ---- Set color
 --color3f :: CustomColor -> IO ()
@@ -117,8 +117,8 @@ draw obj1 state = do
     rotate z (Vector3 0 0 1)
 
   preservingMatrix $ do
-    translatef (Vector3 (-3) (-2) 0)
-    rotate (0.0 :: GLfloat) (Vector3 0 0 1)
+    --translatef (Vector3 x y z)
+    rotate (0.0 :: GLfloat) (Vector3 0 0 0)
     callList obj1
 
   swapBuffers

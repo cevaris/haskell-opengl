@@ -150,6 +150,7 @@ draw :: (DisplayList,DisplayList,DisplayList,Int) -> State -> IO ()
 draw (gear1, gear2, gear3, autoexit) state = do
    clear [ ColorBuffer, DepthBuffer ]
    (x, y, z) <- get (viewRot state)
+   --let (x, y, z) = (20 :: GLfloat, 30 :: GLfloat, 0 :: GLfloat)
    a <- get (angle' state)
 
    let translatef = translate :: Vector3 GLfloat -> IO ()
@@ -163,15 +164,15 @@ draw (gear1, gear2, gear3, autoexit) state = do
          rotate a (Vector3 0 0 1)
          callList gear1
 
-      preservingMatrix $ do
-         translatef (Vector3 3.1 (-2) 0)
-         rotate (-2 * a - 9) (Vector3 0 0 1)
-         callList gear2
+      --preservingMatrix $ do
+      --   translatef (Vector3 3.1 (-2) 0)
+      --   rotate (-2 * a - 9) (Vector3 0 0 1)
+      --   callList gear2
 
-      preservingMatrix $ do
-         translatef (Vector3 (-3.1) 4.2 0)
-         rotate (-2 * a - 25) (Vector3 0 0 1)
-         callList gear3
+      --preservingMatrix $ do
+      --   translatef (Vector3 (-3.1) 4.2 0)
+      --   rotate (-2 * a - 25) (Vector3 0 0 1)
+      --   callList gear3
 
    swapBuffers
    frames state $~! (+1)
@@ -192,7 +193,7 @@ draw (gear1, gear2, gear3, autoexit) state = do
 
 idle :: State -> IdleCallback
 idle state = do
-   angle' state $~! (+2)
+   --angle' state $~! (+2)
    postRedisplay Nothing
 
 keyboard :: State -> KeyboardMouseCallback
