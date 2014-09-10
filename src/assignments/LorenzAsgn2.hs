@@ -57,10 +57,10 @@ lorenzPoints state = map (\(Lorenz i x y z) -> ((realToFrac (x/(size state)) :: 
 keyboard :: State -> KeyboardMouseCallback
 keyboard state (Char 'z')           _ _ _ = modRot state ( 0,  0,  5)
 keyboard state (Char 'Z')           _ _ _ = modRot state ( 0,  0, -5)
-keyboard state (SpecialKey KeyUp)   _ _ _ = modRot state ( 5,  0,  0)
-keyboard state (SpecialKey KeyDown) _ _ _ = modRot state (-5,  0,  0)
-keyboard state (SpecialKey KeyLeft) _ _ _ = modRot state ( 0,  5,  0)
-keyboard state (SpecialKey KeyRight)_ _ _ = modRot state ( 0, -5,  0)
+keyboard state (SpecialKey KeyUp)   _ _ _ = modRot state (-5,  0,  0)
+keyboard state (SpecialKey KeyDown) _ _ _ = modRot state ( 5,  0,  0)
+keyboard state (SpecialKey KeyLeft) _ _ _ = modRot state ( 0, -5,  0)
+keyboard state (SpecialKey KeyRight)_ _ _ = modRot state ( 0,  5,  0)
 keyboard _     (Char '\27')         _ _ _ = exitWith ExitSuccess
 keyboard _     _                    _ _ _ = return ()
 
