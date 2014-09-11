@@ -55,15 +55,23 @@ lorenzPoints state = map (\(Lorenz i x y z) -> ((realToFrac (x/(size state)) :: 
 ----------------------------------------------------------------------------------------------------------------
 -- Grid
 
---zeroGrid = replicate 10 0.0 :: [GLfloat]
 zeroGrid = 0.0 :: GLfloat
-tickGrid = map (*0.9) [-10..10] :: [GLfloat]
---tickGrid = map (/5) [-10..10] :: [GLfloat]
+lineGrid = map (*1.0) [-10..10] :: [GLfloat]
 
--- (X, Y, Z ) Grid Points
 gridPoints :: ([(GLfloat, GLfloat, GLfloat)], [(GLfloat, GLfloat, GLfloat)], [(GLfloat, GLfloat, GLfloat)])
-gridPoints = ([(x,zeroGrid,zeroGrid) | x <- tickGrid], [(zeroGrid,x,zeroGrid) | x <- tickGrid], [(zeroGrid,zeroGrid,x) | x <- tickGrid])
---gridPoints = ((tickGrid, zeroGrid, zeroGrid), (zeroGrid, tickGrid, zeroGrid), (zeroGrid, zeroGrid, tickGrid))
+gridPoints = ([(x,zeroGrid,zeroGrid) | x <- lineGrid], [(zeroGrid,x,zeroGrid) | x <- lineGrid], [(zeroGrid,zeroGrid,x) | x <- lineGrid])
+----------------------------------------------------------------------------------------------------------------
+
+
+----------------------------------------------------------------------------------------------------------------
+-- Axes
+
+tickZero = 0.0 :: GLfloat
+tickLine = map (*1.0) [-1..1] :: [GLfloat]
+tickBase = map (*1.0) [-10..10] :: [GLfloat]
+
+tickPoints :: ([(GLfloat, GLfloat, GLfloat)], [(GLfloat, GLfloat, GLfloat)], [(GLfloat, GLfloat, GLfloat)])
+tickPoints = (chunksOf 3 $ [(a, b, tickZero) | a <- tickBase, b <- tickLine ], chunksOf 3 $ [(b, a, tickZero) | a <- tickBase, b <- tickLine ], chunksOf 3 $ [(tickZero, b, a) | a <- tickBase, b <- tickLine ])
 
 ----------------------------------------------------------------------------------------------------------------
 
