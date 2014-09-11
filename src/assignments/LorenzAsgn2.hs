@@ -55,9 +55,14 @@ lorenzPoints state = map (\(Lorenz i x y z) -> ((realToFrac (x/(size state)) :: 
 ----------------------------------------------------------------------------------------------------------------
 -- Grid
 
+--zeroGrid = replicate 10 0.0 :: [GLfloat]
+zeroGrid = 0.0 :: GLfloat
+tickGrid = map (/10) [-10..10] :: [GLfloat]
+
 -- (X, Y, Z ) Grid Points
-gridPoints :: [(GLfloat, GLfloat, GLfloat)]
-gridPoints = [(x, 0, 0) | x <- [-10..10]] ++ [(0, x, 0) | x <- [-10..10]] ++ [(0, 0, x) | x <- [-10..10]]
+gridPoints :: ([(GLfloat, GLfloat, GLfloat)], [(GLfloat, GLfloat, GLfloat)], [(GLfloat, GLfloat, GLfloat)])
+gridPoints = ([(x,zeroGrid,zeroGrid) | x <- tickGrid], [(zeroGrid,x,zeroGrid) | x <- tickGrid], [(zeroGrid,zeroGrid,x) | x <- tickGrid])
+--gridPoints = ((tickGrid, zeroGrid, zeroGrid), (zeroGrid, tickGrid, zeroGrid), (zeroGrid, zeroGrid, tickGrid))
 
 ----------------------------------------------------------------------------------------------------------------
 
@@ -111,9 +116,10 @@ vertex3f :: GLfloat -> GLfloat -> GLfloat -> IO ()
 vertex3f x y z = vertex $ Vertex3 x y z
 
 
-draw :: DisplayList -> State -> IO ()
-draw obj1 state = do
+draw :: State -> (DisplayList, DisplayList) -> IO ()
+draw state (obj1, grid) = do
   let translatef = translate :: Vector3 GLfloat -> IO ()
+  --let (gridX, gridY, gridZ) = grid
 
   clear [ ColorBuffer, DepthBuffer ]
   (x, y, z) <- get (viewRot state)
@@ -128,6 +134,9 @@ draw obj1 state = do
       --translatef (Vector3 x y z)
       --rotate (0.0 :: GLfloat) (Vector3 0 0 0)
       callList obj1
+
+    preservingMatrix $ do
+      callList grid
 
   swapBuffers
   frames state $~! (+1)
@@ -144,7 +153,7 @@ draw obj1 state = do
     frames state $= 0
 
 
-myInit :: [String] -> State -> IO DisplayList
+myInit :: [String] -> State -> IO (DisplayList, DisplayList)
 myInit args state = do
   position (Light 0) $= Vertex4 5 5 10 0
   cullFace $= Just Back
@@ -155,7 +164,15 @@ myInit args state = do
   l <- defineNewList Compile $ do
     renderPrimitive LineStrip $ do
       mapM_ (\(x, y, z) -> vertex3f x y z ) (lorenzPoints state)
-  return l
+
+  let (gridX, gridY, gridZ) = gridPoints
+  grid <- defineNewList Compile $ do
+    renderPrimitive LineStrip $ do
+      mapM_ (\(x, y, z) -> vertex3f x y z ) gridX
+      mapM_ (\(x, y, z) -> vertex3f x y z ) gridY
+      mapM_ (\(x, y, z) -> vertex3f x y z ) gridZ
+
+  return (l, grid)
 
 ----------------------------------------------------------------------------------------------------------------
 -- Key Binding
@@ -170,9 +187,9 @@ main = do
     _window <- createWindow "Lorenz Attractor - Adam Cardenas"
 
     state <- makeState
-    lorenzObject <- myInit args state
+    (lorenzObject, gridObj) <- myInit args state
 
-    displayCallback $= draw lorenzObject state
+    displayCallback $= draw state (lorenzObject, gridObj)
     reshapeCallback $= Just reshape
     keyboardMouseCallback $= Just (keyboard state)
     visibilityCallback $= Just (visible state)
