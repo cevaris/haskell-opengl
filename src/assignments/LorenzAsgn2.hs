@@ -57,7 +57,8 @@ lorenzPoints state = map (\(Lorenz i x y z) -> ((realToFrac (x/(size state)) :: 
 
 --zeroGrid = replicate 10 0.0 :: [GLfloat]
 zeroGrid = 0.0 :: GLfloat
-tickGrid = map (/10) [-10..10] :: [GLfloat]
+tickGrid = map (*0.9) [-10..10] :: [GLfloat]
+--tickGrid = map (/5) [-10..10] :: [GLfloat]
 
 -- (X, Y, Z ) Grid Points
 gridPoints :: ([(GLfloat, GLfloat, GLfloat)], [(GLfloat, GLfloat, GLfloat)], [(GLfloat, GLfloat, GLfloat)])
@@ -116,10 +117,10 @@ vertex3f :: GLfloat -> GLfloat -> GLfloat -> IO ()
 vertex3f x y z = vertex $ Vertex3 x y z
 
 
-draw :: State -> (DisplayList, DisplayList) -> IO ()
+draw :: State -> (DisplayList, (DisplayList, DisplayList, DisplayList)) -> IO ()
 draw state (obj1, grid) = do
   let translatef = translate :: Vector3 GLfloat -> IO ()
-  --let (gridX, gridY, gridZ) = grid
+  let (gridX, gridY, gridZ) = grid
 
   clear [ ColorBuffer, DepthBuffer ]
   (x, y, z) <- get (viewRot state)
@@ -136,7 +137,13 @@ draw state (obj1, grid) = do
       callList obj1
 
     preservingMatrix $ do
-      callList grid
+      callList gridX
+
+    preservingMatrix $ do
+      callList gridY
+
+    preservingMatrix $ do
+      callList gridZ
 
   swapBuffers
   frames state $~! (+1)
@@ -153,7 +160,7 @@ draw state (obj1, grid) = do
     frames state $= 0
 
 
-myInit :: [String] -> State -> IO (DisplayList, DisplayList)
+myInit :: [String] -> State -> IO (DisplayList, (DisplayList, DisplayList, DisplayList))
 myInit args state = do
   position (Light 0) $= Vertex4 5 5 10 0
   cullFace $= Just Back
@@ -166,13 +173,20 @@ myInit args state = do
       mapM_ (\(x, y, z) -> vertex3f x y z ) (lorenzPoints state)
 
   let (gridX, gridY, gridZ) = gridPoints
-  grid <- defineNewList Compile $ do
+  gridObjX <- defineNewList Compile $ do
     renderPrimitive LineStrip $ do
       mapM_ (\(x, y, z) -> vertex3f x y z ) gridX
+
+  gridObjY <- defineNewList Compile $ do
+    renderPrimitive LineStrip $ do
       mapM_ (\(x, y, z) -> vertex3f x y z ) gridY
+
+  gridObjZ <- defineNewList Compile $ do
+    renderPrimitive LineStrip $ do
       mapM_ (\(x, y, z) -> vertex3f x y z ) gridZ
 
-  return (l, grid)
+  let gridObj = (gridObjX, gridObjY, gridObjZ)
+  return (l, gridObj)
 
 ----------------------------------------------------------------------------------------------------------------
 -- Key Binding
