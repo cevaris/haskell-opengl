@@ -120,7 +120,7 @@ vertex3f x y z = vertex $ Vertex3 x y z
 draw :: State -> (DisplayList, (DisplayList, DisplayList, DisplayList)) -> IO ()
 draw state (obj1, grid) = do
   let translatef = translate :: Vector3 GLfloat -> IO ()
-  let (gridX, gridY, gridZ) = grid
+  let (gridObjX, gridObjY, gridObjZ) = grid
 
   clear [ ColorBuffer, DepthBuffer ]
   (x, y, z) <- get (viewRot state)
@@ -132,18 +132,18 @@ draw state (obj1, grid) = do
     rotate z (Vector3 0 0 1)
 
     preservingMatrix $ do
-      --translatef (Vector3 x y z)
+      translatef (Vector3 0 0 (-5))
       --rotate (0.0 :: GLfloat) (Vector3 0 0 0)
       callList obj1
 
     preservingMatrix $ do
-      callList gridX
+      callList gridObjX
 
     preservingMatrix $ do
-      callList gridY
+      callList gridObjY
 
     preservingMatrix $ do
-      callList gridZ
+      callList gridObjZ
 
   swapBuffers
   frames state $~! (+1)
@@ -162,7 +162,7 @@ draw state (obj1, grid) = do
 
 myInit :: [String] -> State -> IO (DisplayList, (DisplayList, DisplayList, DisplayList))
 myInit args state = do
-  position (Light 0) $= Vertex4 5 5 10 0
+  position (Light 0) $= Vertex4 5 5 15 0
   cullFace $= Just Back
   lighting $= Enabled
   light (Light 0) $= Enabled
