@@ -153,12 +153,10 @@ vertex3f x y z = vertex $ Vertex3 x y z
 
 draw :: State -> (DisplayList, DisplayList) -> IO ()
 draw state (obj1, grid) = do
-  let translatef = translate :: Vector3 GLfloat -> IO ()
-  
+    
   clear [ ColorBuffer, DepthBuffer ]
-  --(x, y, z) <- get (viewRot state)
-  --a <- get (angle' state)
-
+  
+  -- Rotate
   ph <- get (ph' state)
   th <- get (th' state)
   
@@ -168,53 +166,51 @@ draw state (obj1, grid) = do
   rotate ph (Vector3 1 0 0)
   rotate th (Vector3 0 1 0)
   
-  --rotate (0.0 :: GLfloat) (Vector3 0 0 0)
   preservingMatrix $ do   
     lineWidth $= 0.5
     scale 0.019 0.019 (0.019::GLfloat)
-    renderPrimitive LineStrip $ do
-      mapM_ (\(x, y, z) -> vertex3f x y z ) (lorenzPoints state)
-
+    callList obj1
+  
   preservingMatrix $ do
     scale 0.5 0.5 (0.5::GLfloat)
     lineWidth $= 2
     callList grid
+
+  preservingMatrix $ do
+    --scale (1e-3::GLfloat) 1e-3 1e-3
+    --w <- stringWidth Roman "Stroke font"
+    --translate (Vector3 (-0.5*(fromIntegral w)) 0 0 :: Vector3 GLfloat)
+    --renderString Roman "Stroke font"
+    --loadIdentity
+    
+    --translate (Vector3 0.5  0 (0 :: GLfloat))
+    --rotate th (Vector3 0 1 0)
+
+    currentRasterPosition $= Vertex4 (0.5:: GLfloat) 0 0 1
+    
+    --scale 0.001 0.001 (0.001::GLfloat)
     --scale 1 1 (1::GLfloat)
-    --lineWidth $= 1
-
-  --preservingMatrix $ do   
-  --  lineWidth $= 0.5
-  --  scale 0.019 0.019 (0.019::GLfloat)
-  --  translatef (Vector3 10 10 (10::GLfloat))
-  --  renderPrimitive LineStrip $ do
-  --    mapM_ (\(x, y, z) -> vertex3f x y z ) (lorenzPoints state)
+    --rasterPos (Vertex2 0 (0::GLfloat))
+    --renderString Roman "X"
+    renderString Helvetica18 $ "X"
 
 
   --preservingMatrix $ do
-  --  rotate x (Vector3 1 0 0)
-  --  rotate y (Vector3 0 1 0)
-  --  rotate z (Vector3 0 0 1)
+  --  loadIdentity
+  --  --rasterPos (Vertex3 0 0 (0::GLfloat))
+  --  translate (Vector3 0.5  0 (0 :: GLfloat))
+  --  scale 0.001 0.001 (0.001::GLfloat)
+  --  --rasterPos (Vertex2 10 (0::GLfloat))
+  --  renderString Roman "X"
+    
+  --preservingMatrix $ do
+    --currentRasterPosition $= Vertex4 5 0 0 (1::GLfloat)
 
-    --scale 0.01 0.01 (0.01::GLfloat)
-    --renderString Roman "Test string"
 
   --preservingMatrix $ do
-  --  translatef (Vector3 0 0 (-5))
-  --  --rotate (0.0 :: GLfloat) (Vector3 0 0 0)
-  --  lineWidth $= 0.5
-  --  callList obj1
-
-  --preservingMatrix $ do
-  --  scale 5 5 (5::GLfloat)
-  --  --lineWidth $= 3
-  --  callList grid
-  --  --scale 1 1 (1::GLfloat)
-  --  --lineWidth $= 1
-
-  --preservingMatrix $ do
-  --  rasterPos (Vertex3 0 0 (5::GLfloat))
-  --  --scale 0.001 0.001 (0.001::GLfloat)
-  --  renderString Roman "XXXXX"
+  --  --windowPos (Vertex2 5 (5::GLfloat))
+  --  scale 0.001 0.001 (0.001::GLfloat)
+  --  renderString Roman "HELLO MOTO"
 
   swapBuffers
   frames state $~! (+1)
