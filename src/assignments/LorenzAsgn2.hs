@@ -113,20 +113,32 @@ keyboard _     _                    _ _ _ = return ()
 
 
 ----------------------------------------------------------------------------------------------------------------
-
+--toInteger $ round  (33 :: GLfloat)
 modRot :: State -> SpecialKey -> IO ()
 modRot state KeyDown = do
   ph' state $~! (+5)
+  (viewRot state) $~! (\(x, y, z) -> (x-5, y, z))
+  --(x, y, z) <- get (viewRot state)
+  --viewRot state $= (x + 5, y + 0, z + 0)
   postRedisplay Nothing
 modRot state KeyUp  = do
   ph' state $~! (\x -> x - 5)
+  (viewRot state) $~! (\(x, y, z) -> (x+5, y, z))
   postRedisplay Nothing
+  --(x, y, z) <- get (viewRot state)
+  --viewRot state $= (x + dx, y + dy, z + dz)
 modRot state KeyRight = do
   th' state $~! (+5)
+  (viewRot state) $~! (\(x, y, z) -> (x, y-5, z))
   postRedisplay Nothing
+  --(x, y, z) <- get (viewRot state)
+  --viewRot state $= (x + dx, y + dy, z + dz)
 modRot state KeyLeft = do
   th' state $~!(\x -> x - 5)
+  (viewRot state) $~! (\(x, y, z) -> (x, y+5, z))
   postRedisplay Nothing
+  --(x, y, z) <- get (viewRot state)
+  --viewRot state $= (x + dx, y + dy, z + dz)
 
 
 idle :: State -> IdleCallback
@@ -145,11 +157,32 @@ reshape s@(Size width height) = do
    viewport $= (Position 0 0, s)
    matrixMode $= Projection
    loadIdentity
+   --frustum (-1) 1 (-h) h 0 0
    --frustum (-1) 1 (-h) h 5 60
-   frustum (-1) 1 (-h) h 5 0
+   frustum (-h) h (-h) h 30 60
    matrixMode $= Modelview 0
    loadIdentity
    translate (Vector3 0 0 (-40 :: GLfloat))
+
+
+--setupProjection :: ReshapeCallback
+--setupProjection (Size width height) = do
+--  -- don't want a divide by zero
+--  --let h = max 1 height
+--  -- reset the viewport to new dimensions
+--  viewport $= (Position 0 0, Size width height)
+--  -- set projection matrix as the current matrix
+--  matrixMode $= Projection
+--  -- reset projection matrix
+--  loadIdentity
+--  -- calculate aspect ratio of window
+--  --perspective 52 (fromIntegral width / fromIntegral h) 1 1000
+--  --perspective 52 (fromIntegral width / fromIntegral h) 1 1
+--  -- set modelview matrix
+--  matrixMode $= Modelview 0
+--  -- reset modelview matrix
+--  loadIdentity
+
 
 -- Set Vertex2
 vertex2f :: GLfloat -> GLfloat -> IO ()
@@ -164,6 +197,9 @@ vertex3f x y z = vertex $ Vertex3 x y z
 vertex4f :: GLfloat -> GLfloat -> GLfloat -> GLfloat -> Vertex4 GLfloat
 vertex4f x y z w = Vertex4 x y z w
 
+glWindowPos :: GLfloat -> GLfloat -> IO ()
+glWindowPos x y = glWindowPos2f x y
+
 
 updateInfo :: State -> IO ()
 updateInfo state = do 
@@ -173,13 +209,13 @@ updateInfo state = do
   when (t - t0' >= 1000) $ do
     f <- get (frames state)
     angle <- get (angle' state)
-    --view <- get (viewRot state)
+    view <- get (viewRot state)
     ph <- get (ph' state)
     th <- get (th' state)
     let seconds = fromIntegral (t - t0') / 1000 :: GLfloat
         fps = fromIntegral f / seconds
         --result = (show f ++ " frames in " ++ show seconds ++ " seconds = "++ show fps ++ " FPS" ++ " ph " ++ show ph ++ " th " ++ show th)
-        result = (show f ++ " frames in " ++  (showGFloat (Just 2) seconds "") ++ " seconds = "++ (showGFloat (Just 2) fps "") ++ " FPS" ++ " ph " ++ show ph ++ " th " ++ show th)
+        result = ("[" ++ show f ++ " frames in " ++  (showGFloat (Just 2) seconds "") ++ " seconds] ["++ (showGFloat (Just 2) fps "") ++ " FPS]" ++ " [ph " ++ show ph ++ "] [th " ++ show th ++ "] ["  ++ show view ++ "]")
     info state $= result
     --putStrLn 
     t0 state $= t
@@ -187,66 +223,81 @@ updateInfo state = do
 
 
 draw :: State -> (DisplayList, DisplayList) -> IO ()
-draw state (obj1, grid) = do
+draw state (lorenzAttractor, grid) = do
     
   clear [ ColorBuffer, DepthBuffer ]
-  
-  -- Rotate
-  ph <- get (ph' state)
-  th <- get (th' state)
+
+  (x, y, z) <- get (viewRot state)
+
   info <- get (info state)
-  
-  loadIdentity
-
-  rotate ph (Vector3 1 0 0)
-  rotate th (Vector3 0 1 0)
-  
-  preservingMatrix $ do   
-    lineWidth $= 0.5
-    scale 0.019 0.019 (0.019::GLfloat)
-    callList obj1
-  
-  preservingMatrix $ do
-    scale 0.5 0.5 (0.5::GLfloat)
-    lineWidth $= 2
-    callList grid
 
   preservingMatrix $ do
-    currentRasterPosition $= vertex4f 0.5 0 0 1
-    renderString Helvetica18 $ "X"
-    currentRasterPosition $= vertex4f 0 0.5 0 1
-    renderString Helvetica18 $ "Y"
-    currentRasterPosition $= vertex4f 0 0 0.5 1
-    renderString Helvetica18 $ "Z"
-    currentRasterPosition $= vertex4f 0 0 0 1
+    rotate x (Vector3 1 0 0)
+    rotate y (Vector3 0 1 0)
+    rotate z (Vector3 0 0 1)
 
-  preservingMatrix $ do
-    glWindowPos2i 5 (5::GLint)
-    renderString Helvetica18 $ info
-
-  
-
-  
-
-  --preservingMatrix $ do
-  --  loadIdentity
-  --  --rasterPos (Vertex3 0 0 (0::GLfloat))
-  --  translate (Vector3 0.5  0 (0 :: GLfloat))
-  --  scale 0.001 0.001 (0.001::GLfloat)
-  --  --rasterPos (Vertex2 10 (0::GLfloat))
-  --  renderString Roman "X"
+    preservingMatrix $ do   
+      lineWidth $= 0.5
+      scale 0.019 0.019 (0.019::GLfloat)
+      callList lorenzAttractor
     
-  --preservingMatrix $ do
-    --currentRasterPosition $= Vertex4 5 0 0 (1::GLfloat)
+    preservingMatrix $ do
+      lineWidth $= 2
+      scale 0.5 0.5 (0.5::GLfloat)
+      callList grid
 
+    preservingMatrix $ do
+      currentRasterPosition $= vertex4f 0.5 0 0 1
+      renderString Helvetica18 $ "X"
+      currentRasterPosition $= vertex4f 0 0.5 0 1
+      renderString Helvetica18 $ "Y"
+      currentRasterPosition $= vertex4f 0 0 0.5 1
+      renderString Helvetica18 $ "Z"
+      currentRasterPosition $= vertex4f 0 0 0 1
 
-  --preservingMatrix $ do
-  --  --windowPos (Vertex2 5 (5::GLfloat))
-  --  scale 0.001 0.001 (0.001::GLfloat)
-  --  renderString Roman "HELLO MOTO"
+    preservingMatrix $ do
+      glWindowPos 5 5
+      renderString Helvetica18 $ info
 
   swapBuffers
   updateInfo state
+  
+  -- Rotate
+  --ph <- get (ph' state)
+  --th <- get (th' state)
+  --info <- get (info state)
+  
+  --loadIdentity
+
+  --rotate ph (Vector3 1 0 0)
+  --rotate th (Vector3 0 1 0)
+  
+  --preservingMatrix $ do   
+  --  lineWidth $= 0.5
+  --  scale 0.019 0.019 (0.019::GLfloat)
+  --  callList lorenzAttractor
+  
+  --preservingMatrix $ do
+  --  lineWidth $= 2
+  --  scale 0.5 0.5 (0.5::GLfloat)
+  --  callList grid
+
+  --preservingMatrix $ do
+  --  currentRasterPosition $= vertex4f 0.5 0 0 1
+  --  renderString Helvetica18 $ "X"
+  --  currentRasterPosition $= vertex4f 0 0.5 0 1
+  --  renderString Helvetica18 $ "Y"
+  --  currentRasterPosition $= vertex4f 0 0 0.5 1
+  --  renderString Helvetica18 $ "Z"
+  --  currentRasterPosition $= vertex4f 0 0 0 1
+
+  --preservingMatrix $ do
+  --  glWindowPos 5 5
+  --  renderString Helvetica18 $ info
+
+
+  --swapBuffers
+  --updateInfo state
   
 
 
@@ -258,7 +309,7 @@ myInit args state = do
   --light (Light 0) $= Enabled
   --depthFunc $= Just Less
 
-  l <- defineNewList Compile $ do
+  lorenzAttractor <- defineNewList Compile $ do
     renderPrimitive LineStrip $ do
       mapM_ (\(x, y, z) -> vertex3f x y z ) (lorenzPoints state)
 
@@ -267,7 +318,7 @@ myInit args state = do
     renderPrimitive Lines $ do
       mapM_ (\(x, y, z) -> vertex3f x y z ) gridPoints
 
-  return (l, grid)
+  return (lorenzAttractor, grid)
 
 ----------------------------------------------------------------------------------------------------------------
 -- Key Binding
@@ -286,6 +337,8 @@ main = do
 
     displayCallback $= draw state (lorenzObject, gridObj)
     reshapeCallback $= Just reshape
+    --reshapeCallback $= Just setupProjection
+
     keyboardMouseCallback $= Just (keyboard state)
     visibilityCallback $= Just (visible state)
     mainLoop
