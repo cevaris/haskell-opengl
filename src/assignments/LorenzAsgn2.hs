@@ -20,7 +20,7 @@ makeState = do
    t <- newIORef 0
    v <- newIORef (0, 0, 0)
    a <- newIORef 0
-   return $ State { frames = f, t0 = t, viewRot = v, angle' = a , size = 5 }
+   return $ State { frames = f, t0 = t, viewRot = v, angle' = a , size = 100}
 
 ----------------------------------------------------------------------------------------------------------------
 
@@ -46,7 +46,8 @@ lorenz  dt = go lzBase [lzBase]
                                     in go l (l:xs)
 
 lorenzPoints :: State -> [(GLfloat,GLfloat,GLfloat)] 
-lorenzPoints state = map (\(Lorenz i x y z) -> ((realToFrac (x/(size state)) :: GLfloat), (realToFrac (y/(size state)) :: GLfloat), (realToFrac (z/(size state)) :: GLfloat))) (lorenz 0.001)
+--lorenzPoints state = map (\(Lorenz i x y z) -> ((realToFrac (x/(size state)) :: GLfloat), (realToFrac (y/(size state)) :: GLfloat), (realToFrac (z/(size state)) :: GLfloat))) (lorenz 0.001)
+lorenzPoints state = map (\(Lorenz i x y z) -> ((realToFrac x :: GLfloat), (realToFrac y :: GLfloat), (realToFrac z :: GLfloat))) (lorenz 0.001)
 
 --rainbowColors = [(x,y,z) | x <- [1..5], y <- [1..5], z <- [1..5]]
 ----------------------------------------------------------------------------------------------------------------
@@ -129,39 +130,51 @@ vertex3f x y z = vertex $ Vertex3 x y z
 
 draw :: State -> (DisplayList, DisplayList) -> IO ()
 draw state (obj1, grid) = do
-  let translatef = translate :: Vector3 GLfloat -> IO ()
+  --let translatef = translate :: Vector3 GLfloat -> IO ()
   
   clear [ ColorBuffer, DepthBuffer ]
-  (x, y, z) <- get (viewRot state)
-  a <- get (angle' state)
+  --(x, y, z) <- get (viewRot state)
+  --a <- get (angle' state)
+
+  
+  
+
+  loadIdentity
+  
+
+  --rotate (0.0 :: GLfloat) (Vector3 0 0 0)
+  preservingMatrix $ do   
+    lineWidth $= 0.5
+    scale 0.019 0.019 (0.019::GLfloat)
+    renderPrimitive LineStrip $ do
+      mapM_ (\(x, y, z) -> vertex3f x y z ) (lorenzPoints state)
 
 
-
-  preservingMatrix $ do
-    rotate x (Vector3 1 0 0)
-    rotate y (Vector3 0 1 0)
-    rotate z (Vector3 0 0 1)
+  --preservingMatrix $ do
+  --  rotate x (Vector3 1 0 0)
+  --  rotate y (Vector3 0 1 0)
+  --  rotate z (Vector3 0 0 1)
 
     --scale 0.01 0.01 (0.01::GLfloat)
     --renderString Roman "Test string"
 
-    preservingMatrix $ do
-      translatef (Vector3 0 0 (-5))
-      --rotate (0.0 :: GLfloat) (Vector3 0 0 0)
-      lineWidth $= 0.5
-      callList obj1
+  --preservingMatrix $ do
+  --  translatef (Vector3 0 0 (-5))
+  --  --rotate (0.0 :: GLfloat) (Vector3 0 0 0)
+  --  lineWidth $= 0.5
+  --  callList obj1
 
-    preservingMatrix $ do
-      scale 5 5 (5::GLfloat)
-      --lineWidth $= 3
-      callList grid
-      --scale 1 1 (1::GLfloat)
-      --lineWidth $= 1
+  --preservingMatrix $ do
+  --  scale 5 5 (5::GLfloat)
+  --  --lineWidth $= 3
+  --  callList grid
+  --  --scale 1 1 (1::GLfloat)
+  --  --lineWidth $= 1
 
-    preservingMatrix $ do
-      rasterPos (Vertex3 0 0 (5::GLfloat))
-      --scale 0.001 0.001 (0.001::GLfloat)
-      renderString Roman "XXXXX"
+  --preservingMatrix $ do
+  --  rasterPos (Vertex3 0 0 (5::GLfloat))
+  --  --scale 0.001 0.001 (0.001::GLfloat)
+  --  renderString Roman "XXXXX"
 
   swapBuffers
   frames state $~! (+1)
@@ -213,7 +226,7 @@ main = do
     (lorenzObject, gridObj) <- myInit args state
 
     displayCallback $= draw state (lorenzObject, gridObj)
-    reshapeCallback $= Just reshape
+    --reshapeCallback $= Just reshape
     keyboardMouseCallback $= Just (keyboard state)
     visibilityCallback $= Just (visible state)
     mainLoop
