@@ -118,27 +118,19 @@ modRot :: State -> SpecialKey -> IO ()
 modRot state KeyDown = do
   ph' state $~! (+5)
   (viewRot state) $~! (\(x, y, z) -> (x-5, y, z))
-  --(x, y, z) <- get (viewRot state)
-  --viewRot state $= (x + 5, y + 0, z + 0)
   postRedisplay Nothing
 modRot state KeyUp  = do
   ph' state $~! (\x -> x - 5)
   (viewRot state) $~! (\(x, y, z) -> (x+5, y, z))
   postRedisplay Nothing
-  --(x, y, z) <- get (viewRot state)
-  --viewRot state $= (x + dx, y + dy, z + dz)
 modRot state KeyRight = do
   th' state $~! (+5)
   (viewRot state) $~! (\(x, y, z) -> (x, y-5, z))
   postRedisplay Nothing
-  --(x, y, z) <- get (viewRot state)
-  --viewRot state $= (x + dx, y + dy, z + dz)
 modRot state KeyLeft = do
   th' state $~!(\x -> x - 5)
   (viewRot state) $~! (\(x, y, z) -> (x, y+5, z))
   postRedisplay Nothing
-  --(x, y, z) <- get (viewRot state)
-  --viewRot state $= (x + dx, y + dy, z + dz)
 
 
 idle :: State -> IdleCallback
@@ -153,55 +145,15 @@ visible _     NotVisible = idleCallback $= Nothing
 reshape :: ReshapeCallback
 reshape s@(Size width height) = do
   let h = fromIntegral height / fromIntegral width
+      wf = fromIntegral width
+      hf = fromIntegral height
 
   viewport $= (Position 0 0, s)
   matrixMode $= Projection
-  loadIdentity
-  --frustum (-1) 1 (-h) h 0 0
-  --frustum (-1) 1 (-h) h 5 60
-  --frustum (-h) h (-h) h 30 60
-
-
-  --if height > 0 
-  --  then ortho (-(width/height)) +(width/height) (-1) +1 (-1) (1::GLfloat)
-  --  else ortho (-1) +1 (-1) +1 (-1) (1::GLfloat)
-  --let wf = fromIntegral width
-  --    hf = fromIntegral height
-  --if width <= height
-  --  then ortho2D 0 1 0 (hf/wf)
-  --  else ortho2D 0 (wf/hf) 0 1
-   --ortho2D 0 1 0 (hf/wf)
-  --ortho2D 0 1 0 1
-  --loadIdentity
-
-  let wf = fromIntegral width
-      hf = fromIntegral height
-  
+  loadIdentity  
   ortho (-1) (wf/hf) (-1) 1 (-1) (1:: GLdouble)
   matrixMode $= Modelview 0
   loadIdentity
-  --translate (Vector3 0 0 (-40 :: GLfloat))
-  --translate (Vector3 0 100 (-40 :: GLfloat))
-
-
---setupProjection :: ReshapeCallback
---setupProjection (Size width height) = do
---  -- don't want a divide by zero
---  --let h = max 1 height
---  -- reset the viewport to new dimensions
---  viewport $= (Position 0 0, Size width height)
---  -- set projection matrix as the current matrix
---  matrixMode $= Projection
---  -- reset projection matrix
---  loadIdentity
---  -- calculate aspect ratio of window
---  --perspective 52 (fromIntegral width / fromIntegral h) 1 1000
---  --perspective 52 (fromIntegral width / fromIntegral h) 1 1
---  -- set modelview matrix
---  matrixMode $= Modelview 0
---  -- reset modelview matrix
---  loadIdentity
-
 
 -- Set Vertex2
 vertex2f :: GLfloat -> GLfloat -> IO ()
@@ -245,41 +197,6 @@ draw :: State -> (DisplayList, DisplayList) -> IO ()
 draw state (lorenzAttractor, grid) = do
     
   clear [ ColorBuffer, DepthBuffer ]
-
-  --(x, y, z) <- get (viewRot state)
-
-  --info <- get (info state)
-
-  --preservingMatrix $ do
-  --  rotate x (Vector3 1 0 0)
-  --  rotate y (Vector3 0 1 0)
-  --  rotate z (Vector3 0 0 1)
-
-  --  preservingMatrix $ do   
-  --    lineWidth $= 0.5
-  --    scale 0.019 0.019 (0.019::GLfloat)
-  --    callList lorenzAttractor
-    
-  --  preservingMatrix $ do
-  --    lineWidth $= 2
-  --    scale 0.5 0.5 (0.5::GLfloat)
-  --    callList grid
-
-  --  preservingMatrix $ do
-  --    currentRasterPosition $= vertex4f 0.5 0 0 1
-  --    renderString Helvetica18 $ "X"
-  --    currentRasterPosition $= vertex4f 0 0.5 0 1
-  --    renderString Helvetica18 $ "Y"
-  --    currentRasterPosition $= vertex4f 0 0 0.5 1
-  --    renderString Helvetica18 $ "Z"
-  --    currentRasterPosition $= vertex4f 0 0 0 1
-
-  --  preservingMatrix $ do
-  --    glWindowPos 5 5
-  --    renderString Helvetica18 $ info
-
-  --swapBuffers
-  --updateInfo state
   
   --Rotate
   ph <- get (ph' state)
