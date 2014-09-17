@@ -146,9 +146,31 @@ reshape s@(Size width height) = do
    translate (Vector3 0 0 (-40 :: GLfloat))
   
 
--- Set Vertex
+-- Set Vertex3
 vertex3f :: GLfloat -> GLfloat -> GLfloat -> IO ()
 vertex3f x y z = vertex $ Vertex3 x y z
+
+-- Set Vertex4
+vertex4f :: GLfloat -> GLfloat -> GLfloat -> GLfloat -> Vertex4 GLfloat
+vertex4f x y z w = Vertex4 x y z w
+
+
+printDebug :: State -> IO ()
+printDebug state = do 
+  frames state $~! (+1)
+  t0' <- get (t0 state)
+  t <- get elapsedTime
+  when (t - t0' >= 1000) $ do
+    f <- get (frames state)
+    angle <- get (angle' state)
+    --view <- get (viewRot state)
+    ph <- get (ph' state)
+    th <- get (th' state)
+    let seconds = fromIntegral (t - t0') / 1000 :: GLfloat
+        fps = fromIntegral f / seconds
+    putStrLn (show f ++ " frames in " ++ show seconds ++ " seconds = "++ show fps ++ " FPS" ++ " ph " ++ show ph ++ " th " ++ show th)
+    t0 state $= t
+    frames state $= 0
 
 
 draw :: State -> (DisplayList, DisplayList) -> IO ()
@@ -160,7 +182,6 @@ draw state (obj1, grid) = do
   ph <- get (ph' state)
   th <- get (th' state)
   
-
   loadIdentity
 
   rotate ph (Vector3 1 0 0)
@@ -177,23 +198,14 @@ draw state (obj1, grid) = do
     callList grid
 
   preservingMatrix $ do
-    --scale (1e-3::GLfloat) 1e-3 1e-3
-    --w <- stringWidth Roman "Stroke font"
-    --translate (Vector3 (-0.5*(fromIntegral w)) 0 0 :: Vector3 GLfloat)
-    --renderString Roman "Stroke font"
-    --loadIdentity
-    
-    --translate (Vector3 0.5  0 (0 :: GLfloat))
-    --rotate th (Vector3 0 1 0)
-
-    currentRasterPosition $= Vertex4 (0.5:: GLfloat) 0 0 1
-    
-    --scale 0.001 0.001 (0.001::GLfloat)
-    --scale 1 1 (1::GLfloat)
-    --rasterPos (Vertex2 0 (0::GLfloat))
-    --renderString Roman "X"
+    currentRasterPosition $= vertex4f 0.5 0 0 1
     renderString Helvetica18 $ "X"
-
+    currentRasterPosition $= vertex4f 0 0.5 0 1
+    renderString Helvetica18 $ "Y"
+    currentRasterPosition $= vertex4f 0 0 0.5 1
+    renderString Helvetica18 $ "Z"
+    currentRasterPosition $= vertex4f 0 0 0 1
+  
 
   --preservingMatrix $ do
   --  loadIdentity
@@ -213,20 +225,7 @@ draw state (obj1, grid) = do
   --  renderString Roman "HELLO MOTO"
 
   swapBuffers
-  frames state $~! (+1)
-  t0' <- get (t0 state)
-  t <- get elapsedTime
-  when (t - t0' >= 1000) $ do
-    f <- get (frames state)
-    angle <- get (angle' state)
-    --view <- get (viewRot state)
-    ph <- get (ph' state)
-    th <- get (th' state)
-    let seconds = fromIntegral (t - t0') / 1000 :: GLfloat
-        fps = fromIntegral f / seconds
-    putStrLn (show f ++ " frames in " ++ show seconds ++ " seconds = "++ show fps ++ " FPS" ++ " ph " ++ show ph ++ " th " ++ show th)
-    t0 state $= t
-    frames state $= 0
+  printDebug state
 
 
 myInit :: [String] -> State -> IO (DisplayList, DisplayList)
