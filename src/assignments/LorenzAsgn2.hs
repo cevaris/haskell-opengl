@@ -12,7 +12,9 @@ data State = State {
    t0      :: IORef Int,
    viewRot :: IORef View,
    angle'  :: IORef GLfloat,
-   size    :: Float }
+   ph'     :: IORef GLfloat,
+   th'     :: IORef GLfloat
+ }
 
 makeState :: IO State
 makeState = do
@@ -20,7 +22,9 @@ makeState = do
    t <- newIORef 0
    v <- newIORef (0, 0, 0)
    a <- newIORef 0
-   return $ State { frames = f, t0 = t, viewRot = v, angle' = a , size = 100}
+   ph <- newIORef 0
+   th <- newIORef 0
+   return $ State { frames = f, t0 = t, viewRot = v, angle' = a, ph' = ph, th' = th}
 
 ----------------------------------------------------------------------------------------------------------------
 
@@ -46,7 +50,6 @@ lorenz  dt = go lzBase [lzBase]
                                     in go l (l:xs)
 
 lorenzPoints :: State -> [(GLfloat,GLfloat,GLfloat)] 
---lorenzPoints state = map (\(Lorenz i x y z) -> ((realToFrac (x/(size state)) :: GLfloat), (realToFrac (y/(size state)) :: GLfloat), (realToFrac (z/(size state)) :: GLfloat))) (lorenz 0.001)
 lorenzPoints state = map (\(Lorenz i x y z) -> ((realToFrac x :: GLfloat), (realToFrac y :: GLfloat), (realToFrac z :: GLfloat))) (lorenz 0.001)
 
 --rainbowColors = [(x,y,z) | x <- [1..5], y <- [1..5], z <- [1..5]]
@@ -82,24 +85,43 @@ gridPoints = [(0,0,0),(1,0,0),
 ----------------------------------------------------------------------------------------------------------------
 -- Key Binding
 
+--keyboard :: State -> KeyboardMouseCallback
+--keyboard state (Char 'z')           _ _ _ = modRot state ( 0,  0,  5)
+--keyboard state (Char 'Z')           _ _ _ = modRot state ( 0,  0, -5)
+--keyboard state (SpecialKey KeyUp)   _ _ _ = modRot state (-5,  0,  0)
+--keyboard state (SpecialKey KeyDown) _ _ _ = modRot state ( 5,  0,  0)
+--keyboard state (SpecialKey KeyLeft) _ _ _ = modRot state ( 0, -5,  0)
+--keyboard state (SpecialKey KeyRight)_ _ _ = modRot state ( 0,  5,  0)
+--keyboard _     (Char '\27')         _ _ _ = exitWith ExitSuccess
+--keyboard _     _                    _ _ _ = return ()
+
 keyboard :: State -> KeyboardMouseCallback
-keyboard state (Char 'z')           _ _ _ = modRot state ( 0,  0,  5)
-keyboard state (Char 'Z')           _ _ _ = modRot state ( 0,  0, -5)
-keyboard state (SpecialKey KeyUp)   _ _ _ = modRot state (-5,  0,  0)
-keyboard state (SpecialKey KeyDown) _ _ _ = modRot state ( 5,  0,  0)
-keyboard state (SpecialKey KeyLeft) _ _ _ = modRot state ( 0, -5,  0)
-keyboard state (SpecialKey KeyRight)_ _ _ = modRot state ( 0,  5,  0)
+--keyboard state (Char 'z')           _ _ _ = modRot state ( 0,  0,  5)
+--keyboard state (Char 'Z')           _ _ _ = modRot state ( 0,  0, -5)
+keyboard state (SpecialKey KeyUp)   _ _ _ = modRot state KeyUp
+keyboard state (SpecialKey KeyDown) _ _ _ = modRot state KeyDown
+keyboard state (SpecialKey KeyLeft) _ _ _ = modRot state KeyLeft
+keyboard state (SpecialKey KeyRight)_ _ _ = modRot state KeyRight
 keyboard _     (Char '\27')         _ _ _ = exitWith ExitSuccess
 keyboard _     _                    _ _ _ = return ()
 
+
 ----------------------------------------------------------------------------------------------------------------
 
+modRot :: State -> SpecialKey -> IO ()
+modRot state KeyDown = do
+  ph' state $~! (+5)
+  postRedisplay Nothing
+modRot state KeyUp  = do
+  ph' state $~! (\x -> x - 5)
+  postRedisplay Nothing
+modRot state KeyRight = do
+  th' state $~! (+5)
+  postRedisplay Nothing
+modRot state KeyLeft = do
+  th' state $~!(\x -> x - 5)
+  postRedisplay Nothing
 
-modRot :: State -> View -> IO ()
-modRot state (dx,dy,dz) = do
-   (x, y, z) <- get (viewRot state)
-   viewRot state $= (x + dx, y + dy, z + dz)
-   postRedisplay Nothing
 
 idle :: State -> IdleCallback
 idle state = do
@@ -137,7 +159,14 @@ draw state (obj1, grid) = do
   --(x, y, z) <- get (viewRot state)
   --a <- get (angle' state)
 
+  ph <- get (ph' state)
+  th <- get (th' state)
+  
+
   loadIdentity
+
+  rotate ph (Vector3 1 0 0)
+  rotate th (Vector3 0 1 0)
   
   --rotate (0.0 :: GLfloat) (Vector3 0 0 0)
   preservingMatrix $ do   
@@ -194,10 +223,12 @@ draw state (obj1, grid) = do
   when (t - t0' >= 1000) $ do
     f <- get (frames state)
     angle <- get (angle' state)
-    view <- get (viewRot state)
+    --view <- get (viewRot state)
+    ph <- get (ph' state)
+    th <- get (th' state)
     let seconds = fromIntegral (t - t0') / 1000 :: GLfloat
         fps = fromIntegral f / seconds
-    putStrLn (show f ++ " frames in " ++ show seconds ++ " seconds = "++ show fps ++ " FPS" ++ " angle " ++ show angle ++ " view " ++ show view)
+    putStrLn (show f ++ " frames in " ++ show seconds ++ " seconds = "++ show fps ++ " FPS" ++ " ph " ++ show ph ++ " th " ++ show th)
     t0 state $= t
     frames state $= 0
 
