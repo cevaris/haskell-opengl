@@ -1,4 +1,5 @@
 import Graphics.UI.GLUT
+import Graphics.Rendering.OpenGL.Raw.ARB.WindowPos
 import Control.Monad ( when )
 import Data.IORef ( IORef, newIORef )
 import System.Exit ( exitWith, ExitCode(ExitSuccess), exitFailure )
@@ -144,6 +145,10 @@ reshape s@(Size width height) = do
    matrixMode $= Modelview 0
    loadIdentity
    translate (Vector3 0 0 (-40 :: GLfloat))
+
+-- Set Vertex2
+vertex2f :: GLfloat -> GLfloat -> IO ()
+vertex2f x y = vertex $ Vertex2 x y
   
 
 -- Set Vertex3
@@ -205,6 +210,12 @@ draw state (obj1, grid) = do
     currentRasterPosition $= vertex4f 0 0 0.5 1
     renderString Helvetica18 $ "Z"
     currentRasterPosition $= vertex4f 0 0 0 1
+
+  preservingMatrix $ do
+    --windowPos $ vertex2f 5 5
+    glWindowPos2i 5 (5::GLint)
+    renderString Helvetica18 $ "HELLO"
+
   
 
   --preservingMatrix $ do

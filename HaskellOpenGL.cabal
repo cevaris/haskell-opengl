@@ -59,7 +59,8 @@ executable LorenzAsgn2
     hs-source-dirs:  src/assignments
     main-is:         LorenzAsgn2.hs
     build-depends:   base,
-                     GLUT
+                     GLUT,
+                     OpenGLRaw
 
 executable BasicCube
     hs-source-dirs:  src/examples
