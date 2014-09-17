@@ -117,7 +117,8 @@ reshape s@(Size width height) = do
    viewport $= (Position 0 0, s)
    matrixMode $= Projection
    loadIdentity
-   frustum (-1) 1 (-h) h 5 60
+   --frustum (-1) 1 (-h) h 5 60
+   frustum (-1) 1 (-h) h 5 0
    matrixMode $= Modelview 0
    loadIdentity
    translate (Vector3 0 0 (-40 :: GLfloat))
@@ -130,24 +131,34 @@ vertex3f x y z = vertex $ Vertex3 x y z
 
 draw :: State -> (DisplayList, DisplayList) -> IO ()
 draw state (obj1, grid) = do
-  --let translatef = translate :: Vector3 GLfloat -> IO ()
+  let translatef = translate :: Vector3 GLfloat -> IO ()
   
   clear [ ColorBuffer, DepthBuffer ]
   --(x, y, z) <- get (viewRot state)
   --a <- get (angle' state)
 
-  
-  
-
   loadIdentity
   
-
   --rotate (0.0 :: GLfloat) (Vector3 0 0 0)
   preservingMatrix $ do   
     lineWidth $= 0.5
     scale 0.019 0.019 (0.019::GLfloat)
     renderPrimitive LineStrip $ do
       mapM_ (\(x, y, z) -> vertex3f x y z ) (lorenzPoints state)
+
+  preservingMatrix $ do
+    scale 0.5 0.5 (0.5::GLfloat)
+    lineWidth $= 2
+    callList grid
+    --scale 1 1 (1::GLfloat)
+    --lineWidth $= 1
+
+  --preservingMatrix $ do   
+  --  lineWidth $= 0.5
+  --  scale 0.019 0.019 (0.019::GLfloat)
+  --  translatef (Vector3 10 10 (10::GLfloat))
+  --  renderPrimitive LineStrip $ do
+  --    mapM_ (\(x, y, z) -> vertex3f x y z ) (lorenzPoints state)
 
 
   --preservingMatrix $ do
@@ -215,18 +226,18 @@ myInit args state = do
 
 main :: IO ()
 main = do
-    initialWindowSize $= Size 500 500
+    initialWindowSize $= Size 700 700
     (_progName, args) <- getArgsAndInitialize
     initialDisplayMode $= [ RGBMode, WithDepthBuffer, DoubleBuffered ]
     
-    initialWindowPosition $= Position 0 0
+    initialWindowPosition $= Position 500 500
     _window <- createWindow "Lorenz Attractor - Adam Cardenas"
 
     state <- makeState
     (lorenzObject, gridObj) <- myInit args state
 
     displayCallback $= draw state (lorenzObject, gridObj)
-    --reshapeCallback $= Just reshape
+    reshapeCallback $= Just reshape
     keyboardMouseCallback $= Just (keyboard state)
     visibilityCallback $= Just (visible state)
     mainLoop
