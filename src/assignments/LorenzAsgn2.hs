@@ -152,17 +152,36 @@ visible _     NotVisible = idleCallback $= Nothing
 
 reshape :: ReshapeCallback
 reshape s@(Size width height) = do
-   let h = fromIntegral height / fromIntegral width
+  let h = fromIntegral height / fromIntegral width
 
-   viewport $= (Position 0 0, s)
-   matrixMode $= Projection
-   loadIdentity
-   --frustum (-1) 1 (-h) h 0 0
-   --frustum (-1) 1 (-h) h 5 60
-   frustum (-h) h (-h) h 30 60
-   matrixMode $= Modelview 0
-   loadIdentity
-   translate (Vector3 0 0 (-40 :: GLfloat))
+  viewport $= (Position 0 0, s)
+  matrixMode $= Projection
+  loadIdentity
+  --frustum (-1) 1 (-h) h 0 0
+  --frustum (-1) 1 (-h) h 5 60
+  --frustum (-h) h (-h) h 30 60
+
+
+  --if height > 0 
+  --  then ortho (-(width/height)) +(width/height) (-1) +1 (-1) (1::GLfloat)
+  --  else ortho (-1) +1 (-1) +1 (-1) (1::GLfloat)
+  --let wf = fromIntegral width
+  --    hf = fromIntegral height
+  --if width <= height
+  --  then ortho2D 0 1 0 (hf/wf)
+  --  else ortho2D 0 (wf/hf) 0 1
+   --ortho2D 0 1 0 (hf/wf)
+  --ortho2D 0 1 0 1
+  --loadIdentity
+
+  let wf = fromIntegral width
+      hf = fromIntegral height
+  
+  ortho (-1) (wf/hf) (-1) 1 (-1) (1:: GLdouble)
+  matrixMode $= Modelview 0
+  loadIdentity
+  --translate (Vector3 0 0 (-40 :: GLfloat))
+  --translate (Vector3 0 100 (-40 :: GLfloat))
 
 
 --setupProjection :: ReshapeCallback
@@ -227,77 +246,77 @@ draw state (lorenzAttractor, grid) = do
     
   clear [ ColorBuffer, DepthBuffer ]
 
-  (x, y, z) <- get (viewRot state)
+  --(x, y, z) <- get (viewRot state)
 
-  info <- get (info state)
-
-  preservingMatrix $ do
-    rotate x (Vector3 1 0 0)
-    rotate y (Vector3 0 1 0)
-    rotate z (Vector3 0 0 1)
-
-    preservingMatrix $ do   
-      lineWidth $= 0.5
-      scale 0.019 0.019 (0.019::GLfloat)
-      callList lorenzAttractor
-    
-    preservingMatrix $ do
-      lineWidth $= 2
-      scale 0.5 0.5 (0.5::GLfloat)
-      callList grid
-
-    preservingMatrix $ do
-      currentRasterPosition $= vertex4f 0.5 0 0 1
-      renderString Helvetica18 $ "X"
-      currentRasterPosition $= vertex4f 0 0.5 0 1
-      renderString Helvetica18 $ "Y"
-      currentRasterPosition $= vertex4f 0 0 0.5 1
-      renderString Helvetica18 $ "Z"
-      currentRasterPosition $= vertex4f 0 0 0 1
-
-    preservingMatrix $ do
-      glWindowPos 5 5
-      renderString Helvetica18 $ info
-
-  swapBuffers
-  updateInfo state
-  
-  -- Rotate
-  --ph <- get (ph' state)
-  --th <- get (th' state)
   --info <- get (info state)
-  
-  --loadIdentity
-
-  --rotate ph (Vector3 1 0 0)
-  --rotate th (Vector3 0 1 0)
-  
-  --preservingMatrix $ do   
-  --  lineWidth $= 0.5
-  --  scale 0.019 0.019 (0.019::GLfloat)
-  --  callList lorenzAttractor
-  
-  --preservingMatrix $ do
-  --  lineWidth $= 2
-  --  scale 0.5 0.5 (0.5::GLfloat)
-  --  callList grid
 
   --preservingMatrix $ do
-  --  currentRasterPosition $= vertex4f 0.5 0 0 1
-  --  renderString Helvetica18 $ "X"
-  --  currentRasterPosition $= vertex4f 0 0.5 0 1
-  --  renderString Helvetica18 $ "Y"
-  --  currentRasterPosition $= vertex4f 0 0 0.5 1
-  --  renderString Helvetica18 $ "Z"
-  --  currentRasterPosition $= vertex4f 0 0 0 1
+  --  rotate x (Vector3 1 0 0)
+  --  rotate y (Vector3 0 1 0)
+  --  rotate z (Vector3 0 0 1)
 
-  --preservingMatrix $ do
-  --  glWindowPos 5 5
-  --  renderString Helvetica18 $ info
+  --  preservingMatrix $ do   
+  --    lineWidth $= 0.5
+  --    scale 0.019 0.019 (0.019::GLfloat)
+  --    callList lorenzAttractor
+    
+  --  preservingMatrix $ do
+  --    lineWidth $= 2
+  --    scale 0.5 0.5 (0.5::GLfloat)
+  --    callList grid
 
+  --  preservingMatrix $ do
+  --    currentRasterPosition $= vertex4f 0.5 0 0 1
+  --    renderString Helvetica18 $ "X"
+  --    currentRasterPosition $= vertex4f 0 0.5 0 1
+  --    renderString Helvetica18 $ "Y"
+  --    currentRasterPosition $= vertex4f 0 0 0.5 1
+  --    renderString Helvetica18 $ "Z"
+  --    currentRasterPosition $= vertex4f 0 0 0 1
+
+  --  preservingMatrix $ do
+  --    glWindowPos 5 5
+  --    renderString Helvetica18 $ info
 
   --swapBuffers
   --updateInfo state
+  
+  --Rotate
+  ph <- get (ph' state)
+  th <- get (th' state)
+  info <- get (info state)
+  
+  loadIdentity
+
+  rotate ph (Vector3 1 0 0)
+  rotate th (Vector3 0 1 0)
+  
+  preservingMatrix $ do   
+    lineWidth $= 0.5
+    scale 0.019 0.019 (0.019::GLfloat)
+    callList lorenzAttractor
+  
+  preservingMatrix $ do
+    lineWidth $= 2
+    scale 0.5 0.5 (0.5::GLfloat)
+    callList grid
+
+  preservingMatrix $ do
+    currentRasterPosition $= vertex4f 0.5 0 0 1
+    renderString Helvetica18 $ "X"
+    currentRasterPosition $= vertex4f 0 0.5 0 1
+    renderString Helvetica18 $ "Y"
+    currentRasterPosition $= vertex4f 0 0 0.5 1
+    renderString Helvetica18 $ "Z"
+    currentRasterPosition $= vertex4f 0 0 0 1
+
+  preservingMatrix $ do
+    glWindowPos 5 5
+    renderString Helvetica18 $ info
+
+
+  swapBuffers
+  updateInfo state
   
 
 
