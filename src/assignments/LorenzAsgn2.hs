@@ -1,8 +1,11 @@
-import Graphics.UI.GLUT
-import Graphics.Rendering.OpenGL.Raw.ARB.WindowPos
+import Numeric
 import Control.Monad ( when )
 import Data.IORef ( IORef, newIORef )
 import System.Exit ( exitWith, ExitCode(ExitSuccess), exitFailure )
+
+import Graphics.UI.GLUT
+import Graphics.Rendering.OpenGL.Raw.ARB.WindowPos
+
 
 ----------------------------------------------------------------------------------------------------------------
 -- Global State
@@ -14,7 +17,8 @@ data State = State {
    viewRot :: IORef View,
    angle'  :: IORef GLfloat,
    ph'     :: IORef GLfloat,
-   th'     :: IORef GLfloat
+   th'     :: IORef GLfloat,
+   info    :: IORef String
  }
 
 makeState :: IO State
@@ -25,7 +29,8 @@ makeState = do
    a <- newIORef 0
    ph <- newIORef 0
    th <- newIORef 0
-   return $ State { frames = f, t0 = t, viewRot = v, angle' = a, ph' = ph, th' = th}
+   i <- newIORef ""
+   return $ State { frames = f, t0 = t, viewRot = v, angle' = a, ph' = ph, th' = th, info = i}
 
 ----------------------------------------------------------------------------------------------------------------
 
@@ -160,8 +165,8 @@ vertex4f :: GLfloat -> GLfloat -> GLfloat -> GLfloat -> Vertex4 GLfloat
 vertex4f x y z w = Vertex4 x y z w
 
 
-printDebug :: State -> IO ()
-printDebug state = do 
+updateInfo :: State -> IO ()
+updateInfo state = do 
   frames state $~! (+1)
   t0' <- get (t0 state)
   t <- get elapsedTime
@@ -173,7 +178,10 @@ printDebug state = do
     th <- get (th' state)
     let seconds = fromIntegral (t - t0') / 1000 :: GLfloat
         fps = fromIntegral f / seconds
-    putStrLn (show f ++ " frames in " ++ show seconds ++ " seconds = "++ show fps ++ " FPS" ++ " ph " ++ show ph ++ " th " ++ show th)
+        --result = (show f ++ " frames in " ++ show seconds ++ " seconds = "++ show fps ++ " FPS" ++ " ph " ++ show ph ++ " th " ++ show th)
+        result = (show f ++ " frames in " ++  (showGFloat (Just 2) seconds "") ++ " seconds = "++ (showGFloat (Just 2) fps "") ++ " FPS" ++ " ph " ++ show ph ++ " th " ++ show th)
+    info state $= result
+    --putStrLn 
     t0 state $= t
     frames state $= 0
 
@@ -186,6 +194,7 @@ draw state (obj1, grid) = do
   -- Rotate
   ph <- get (ph' state)
   th <- get (th' state)
+  info <- get (info state)
   
   loadIdentity
 
@@ -212,9 +221,10 @@ draw state (obj1, grid) = do
     currentRasterPosition $= vertex4f 0 0 0 1
 
   preservingMatrix $ do
-    --windowPos $ vertex2f 5 5
     glWindowPos2i 5 (5::GLint)
-    renderString Helvetica18 $ "HELLO"
+    renderString Helvetica18 $ info
+
+  
 
   
 
@@ -236,7 +246,8 @@ draw state (obj1, grid) = do
   --  renderString Roman "HELLO MOTO"
 
   swapBuffers
-  printDebug state
+  updateInfo state
+  
 
 
 myInit :: [String] -> State -> IO (DisplayList, DisplayList)
