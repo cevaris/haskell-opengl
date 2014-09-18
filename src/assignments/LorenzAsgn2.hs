@@ -31,7 +31,7 @@ makeState = do
    ph <- newIORef 0
    th <- newIORef 0
    i  <- newIORef ""
-   z  <- newIORef 0
+   z  <- newIORef 0.02
    return $ State { frames = f, t0 = t, viewRot = v, angle' = a, ph' = ph, th' = th, info = i, zoom = z}
 
 ----------------------------------------------------------------------------------------------------------------
@@ -94,42 +94,48 @@ gridPoints = [(0,0,0),(1,0,0),
 -- Key Binding
 
 --keyboard :: State -> KeyboardMouseCallback
---keyboard state (Char 'z')           _ _ _ = modRot state ( 0,  0,  5)
---keyboard state (Char 'Z')           _ _ _ = modRot state ( 0,  0, -5)
---keyboard state (SpecialKey KeyUp)   _ _ _ = modRot state (-5,  0,  0)
---keyboard state (SpecialKey KeyDown) _ _ _ = modRot state ( 5,  0,  0)
---keyboard state (SpecialKey KeyLeft) _ _ _ = modRot state ( 0, -5,  0)
---keyboard state (SpecialKey KeyRight)_ _ _ = modRot state ( 0,  5,  0)
+--keyboard state (Char 'z')           _ _ _ = modRotate state ( 0,  0,  5)
+--keyboard state (Char 'Z')           _ _ _ = modRotate state ( 0,  0, -5)
+--keyboard state (SpecialKey KeyUp)   _ _ _ = modRotate state (-5,  0,  0)
+--keyboard state (SpecialKey KeyDown) _ _ _ = modRotate state ( 5,  0,  0)
+--keyboard state (SpecialKey KeyLeft) _ _ _ = modRotate state ( 0, -5,  0)
+--keyboard state (SpecialKey KeyRight)_ _ _ = modRotate state ( 0,  5,  0)
 --keyboard _     (Char '\27')         _ _ _ = exitWith ExitSuccess
 --keyboard _     _                    _ _ _ = return ()
 
 keyboard :: State -> KeyboardMouseCallback
---keyboard state (Char 'z')           _ _ _ = modRot state ( 0,  0,  5)
---keyboard state (Char 'Z')           _ _ _ = modRot state ( 0,  0, -5)
-keyboard state (SpecialKey KeyUp)   _ _ _ = modRot state KeyUp
-keyboard state (SpecialKey KeyDown) _ _ _ = modRot state KeyDown
-keyboard state (SpecialKey KeyLeft) _ _ _ = modRot state KeyLeft
-keyboard state (SpecialKey KeyRight)_ _ _ = modRot state KeyRight
+--keyboard state (Char 'z')           _ _ _ = modRotate state ( 0,  0,  5)
+--keyboard state (Char 'Z')           _ _ _ = modRotate state ( 0,  0, -5)
+keyboard state (Char 'z')           _ _ _ = modScale state (-0.0009)
+keyboard state (Char 'Z')           _ _ _ = modScale state 0.0009
+keyboard state (SpecialKey KeyUp)   _ _ _ = modRotate state KeyUp
+keyboard state (SpecialKey KeyDown) _ _ _ = modRotate state KeyDown
+keyboard state (SpecialKey KeyLeft) _ _ _ = modRotate state KeyLeft
+keyboard state (SpecialKey KeyRight)_ _ _ = modRotate state KeyRight
 keyboard _     (Char '\27')         _ _ _ = exitWith ExitSuccess
 keyboard _     _                    _ _ _ = return ()
 
 
 ----------------------------------------------------------------------------------------------------------------
---toInteger $ round  (33 :: GLfloat)
-modRot :: State -> SpecialKey -> IO ()
-modRot state KeyDown = do
+modScale :: State -> GLfloat -> IO ()
+modScale state delta = do
+  (zoom state) $~! (+delta)
+  postRedisplay Nothing
+
+modRotate :: State -> SpecialKey -> IO ()
+modRotate state KeyDown = do
   ph' state $~! (+5)
   (viewRot state) $~! (\(x, y, z) -> (x-5, y, z))
   postRedisplay Nothing
-modRot state KeyUp  = do
+modRotate state KeyUp  = do
   ph' state $~! (\x -> x - 5)
   (viewRot state) $~! (\(x, y, z) -> (x+5, y, z))
   postRedisplay Nothing
-modRot state KeyRight = do
+modRotate state KeyRight = do
   th' state $~! (+5)
   (viewRot state) $~! (\(x, y, z) -> (x, y-5, z))
   postRedisplay Nothing
-modRot state KeyLeft = do
+modRotate state KeyLeft = do
   th' state $~!(\x -> x - 5)
   (viewRot state) $~! (\(x, y, z) -> (x, y+5, z))
   postRedisplay Nothing
@@ -151,7 +157,7 @@ reshape s@(Size width height) = do
   viewport $= (Position 0 0, s)
   matrixMode $= Projection
   loadIdentity  
-  
+
   if width <= height
     then ortho (-1) 1 (-1) (hf/wf) (-1) (1:: GLdouble)
     else ortho (-1) (wf/hf) (-1) 1 (-1) (1:: GLdouble)
@@ -206,29 +212,29 @@ draw state (lorenzAttractor, grid) = do
   ph <- get (ph' state)
   th <- get (th' state)
   info <- get (info state)
+  zoom <- get (zoom state)
   
   loadIdentity
 
+  scale zoom zoom (zoom::GLfloat)
   rotate ph (Vector3 1 0 0)
   rotate th (Vector3 0 1 0)
   
   preservingMatrix $ do   
     lineWidth $= 0.5
-    --scale 0.019 0.019 (0.019::GLfloat)
-    scale 0.02 0.02 (0.02::GLfloat)
     callList lorenzAttractor
   
   preservingMatrix $ do
     lineWidth $= 2
-    scale 0.5 0.5 (0.5::GLfloat)
+    scale 45 45 (45::GLfloat)
     callList grid
 
   preservingMatrix $ do
-    currentRasterPosition $= vertex4f 0.5 0 0 1
+    currentRasterPosition $= vertex4f 45 0 0 1
     renderString Helvetica18 $ "X"
-    currentRasterPosition $= vertex4f 0 0.5 0 1
+    currentRasterPosition $= vertex4f 0 45 0 1
     renderString Helvetica18 $ "Y"
-    currentRasterPosition $= vertex4f 0 0 0.5 1
+    currentRasterPosition $= vertex4f 0 0 45 1
     renderString Helvetica18 $ "Z"
     currentRasterPosition $= vertex4f 0 0 0 1
 
