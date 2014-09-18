@@ -242,6 +242,11 @@ draw state (lorenzAttractor, grid) = do
     glWindowPos 5 5
     renderString Helvetica18 $ info
 
+  preservingMatrix $ do
+    pointSize $= 2
+    renderPrimitive Points $ do
+      mapM_ (\(x, y, z) -> vertex3f x y z ) (lorenzPoints state)
+
 
   swapBuffers
   updateInfo state
