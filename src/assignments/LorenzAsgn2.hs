@@ -18,19 +18,21 @@ data State = State {
    angle'  :: IORef GLfloat,
    ph'     :: IORef GLfloat,
    th'     :: IORef GLfloat,
-   info    :: IORef String
+   info    :: IORef String,
+   zoom    :: IORef GLfloat
  }
 
 makeState :: IO State
 makeState = do
-   f <- newIORef 0
-   t <- newIORef 0
-   v <- newIORef (0, 0, 0)
-   a <- newIORef 0
+   f  <- newIORef 0
+   t  <- newIORef 0
+   v  <- newIORef (0, 0, 0)
+   a  <- newIORef 0
    ph <- newIORef 0
    th <- newIORef 0
-   i <- newIORef ""
-   return $ State { frames = f, t0 = t, viewRot = v, angle' = a, ph' = ph, th' = th, info = i}
+   i  <- newIORef ""
+   z  <- newIORef 0
+   return $ State { frames = f, t0 = t, viewRot = v, angle' = a, ph' = ph, th' = th, info = i, zoom = z}
 
 ----------------------------------------------------------------------------------------------------------------
 
@@ -135,7 +137,6 @@ modRot state KeyLeft = do
 
 idle :: State -> IdleCallback
 idle state = do
-   --angle' state $~! (+2)
    postRedisplay Nothing
 
 visible :: State -> Visibility -> IO ()
@@ -144,15 +145,18 @@ visible _     NotVisible = idleCallback $= Nothing
 
 reshape :: ReshapeCallback
 reshape s@(Size width height) = do
-  let h = fromIntegral height / fromIntegral width
-      wf = fromIntegral width
+  let wf = fromIntegral width
       hf = fromIntegral height
 
   viewport $= (Position 0 0, s)
   matrixMode $= Projection
   loadIdentity  
-  ortho (-1) (wf/hf) (-1) 1 (-1) (1:: GLdouble)
+  
+  if width <= height
+    then ortho (-1) 1 (-1) (hf/wf) (-1) (1:: GLdouble)
+    else ortho (-1) (wf/hf) (-1) 1 (-1) (1:: GLdouble)
   matrixMode $= Modelview 0
+
   loadIdentity
 
 -- Set Vertex2
@@ -210,7 +214,8 @@ draw state (lorenzAttractor, grid) = do
   
   preservingMatrix $ do   
     lineWidth $= 0.5
-    scale 0.019 0.019 (0.019::GLfloat)
+    --scale 0.019 0.019 (0.019::GLfloat)
+    scale 0.02 0.02 (0.02::GLfloat)
     callList lorenzAttractor
   
   preservingMatrix $ do
